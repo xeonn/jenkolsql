@@ -1,25 +1,31 @@
 package my.onn.jdbcadmin;
 
-import java.net.URL;
-import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.TreeSet;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.TilePane;
 
-public class FXMLController implements Initializable {
-    
+public class MainSceneController {
+
+    Set<Button> connections = new TreeSet();
+
     @FXML
-    private Label label;
-    
+    private TextField textFieldSearch;
     @FXML
-    private void handleButtonAction(ActionEvent event) {
-        System.out.println("You clicked me!");
-        label.setText("Hello World!");
+    private Button buttonAdd;
+    @FXML
+    private TilePane tilePane;
+
+    public void initialize() {
+
     }
-    
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }    
+
+    @FXML
+    private void onActionButtonAdd(ActionEvent event) {
+        Button btn = new Button("New Connection");
+        tilePane.getChildren().add(btn);
+    }
 }
