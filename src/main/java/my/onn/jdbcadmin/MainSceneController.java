@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.TilePane;
+import my.onn.jdbcadmin.connection.ConnectionDialogController;
 
 public class MainSceneController {
 
@@ -25,7 +26,10 @@ public class MainSceneController {
 
     @FXML
     private void onActionButtonAdd(ActionEvent event) {
-        Button btn = new Button("New Connection");
-        tilePane.getChildren().add(btn);
+
+        if (ConnectionDialogController.showConnectionDialog() != null) {
+            Button btn = new Button("New Connection");
+            tilePane.getChildren().add(btn);
+        }
     }
 }
