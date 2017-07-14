@@ -30,6 +30,26 @@ public class MainSceneController {
 
     }
 
+    /**
+     * Initialized by MainApp::start
+     *
+     * @param stage
+     * @throws IOException
+     */
+    void start(Stage stage) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainScene.fxml"));
+        loader.setControllerFactory(c -> {
+            return this;
+        });
+
+        Scene scene = new Scene(loader.load());
+        scene.getStylesheets().add("/styles/Styles.css");
+
+        stage.setTitle("JavaFX and Maven");
+        stage.setScene(scene);
+        stage.show();
+    }
+
     @FXML
     private void onActionButtonAdd(ActionEvent event) {
 

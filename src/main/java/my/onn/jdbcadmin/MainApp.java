@@ -2,23 +2,27 @@ package my.onn.jdbcadmin;
 
 import javafx.application.Application;
 import static javafx.application.Application.launch;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.jboss.weld.environment.se.Weld;
 
 public class MainApp extends Application {
 
+    private Weld weld;
+
+    @Override
+    public void stop() throws Exception {
+        weld.shutdown();
+    }
+
+    @Override
+    public void init() throws Exception {
+        weld = new Weld();
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/MainScene.fxml"));
 
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add("/styles/Styles.css");
-
-        stage.setTitle("JavaFX and Maven");
-        stage.setScene(scene);
-        stage.show();
+        weld.initialize().select(MainSceneController.class).get().start(stage);
     }
 
     /**
