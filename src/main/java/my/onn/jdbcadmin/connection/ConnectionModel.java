@@ -11,4 +11,6 @@ package my.onn.jdbcadmin.connection;
  */
 public interface ConnectionModel {
 
+    public String getDatabasename();
+
 }

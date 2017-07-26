@@ -10,57 +10,63 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 
-<BorderPane prefHeight="484.0" prefWidth="860.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" >
-   <top>
-      <Label text="New Server Registration" BorderPane.alignment="CENTER" />
-   </top>
-   <center>
-      <GridPane>
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <Label text="Name" />
-            <TextField GridPane.rowIndex="1" />
-            <TextField GridPane.rowIndex="3" />
-            <TextField GridPane.rowIndex="5" />
-            <Label text="Host" GridPane.rowIndex="2" />
-            <Label text="Port" GridPane.rowIndex="4" />
-            <Label text="Maintenance DB" GridPane.rowIndex="6" />
-            <Label text="User name" GridPane.rowIndex="8" />
-            <Label text="Password" GridPane.rowIndex="10" />
-            <PasswordField GridPane.rowIndex="11" />
-            <TextField GridPane.rowIndex="7" />
-            <TextField GridPane.rowIndex="9" />
-         </children>
-      </GridPane>
-   </center>
-   <padding>
-      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-   </padding>
-   <bottom>
-      <ButtonBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <buttons>
-            <Button fx:id="buttonTestConnection" mnemonicParsing="false" onAction="#onActionButtonTestConnection" text="Test Connection" />
-            <Button fx:id="buttonCancel" cancelButton="true" mnemonicParsing="false" text="Cancel" />
-          <Button fx:id="buttonOk" defaultButton="true" mnemonicParsing="false" text="OK" />
-        </buttons>
-      </ButtonBar>
-   </bottom>
-</BorderPane>
+
+<StackPane fx:id="stackPane" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.onn.jdbcadmin.connection.ConnectionDialog">
+   <children>
+      <BorderPane fx:id="borderPane" prefHeight="484.0" prefWidth="860.0">
+         <top>
+            <Label text="New Server Registration" BorderPane.alignment="CENTER" />
+         </top>
+         <center>
+            <GridPane>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Name" />
+                  <TextField fx:id="textFieldName" GridPane.rowIndex="1" />
+                  <TextField fx:id="textFieldHost" GridPane.rowIndex="3" />
+                  <TextField fx:id="textFieldPort" GridPane.rowIndex="5" />
+                  <Label text="Host" GridPane.rowIndex="2" />
+                  <Label text="Port" GridPane.rowIndex="4" />
+                  <Label text="Maintenance DB" GridPane.rowIndex="6" />
+                  <Label text="User name" GridPane.rowIndex="8" />
+                  <Label text="Password" GridPane.rowIndex="10" />
+                  <PasswordField fx:id="textFieldPassword" GridPane.rowIndex="11" />
+                  <TextField fx:id="textFieldMaintenanceDB" GridPane.rowIndex="7" />
+                  <TextField fx:id="textFieldUsername" GridPane.rowIndex="9" />
+               </children>
+            </GridPane>
+         </center>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+         <bottom>
+            <ButtonBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+              <buttons>
+                  <Button fx:id="buttonTestConnection" mnemonicParsing="false" onAction="#onActionButtonTestConnection" text="Test Connection" />
+                  <Button fx:id="buttonCancel" cancelButton="true" mnemonicParsing="false" text="Cancel" />
+                <Button fx:id="buttonOk" defaultButton="true" mnemonicParsing="false" onAction="#onActionButtonOk" text="OK" />
+              </buttons>
+            </ButtonBar>
+         </bottom>
+      </BorderPane>
+   </children>
+</StackPane>

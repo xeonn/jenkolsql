@@ -16,4 +16,9 @@ public class PostgresqlConnectionModel implements ConnectionModel {
     public PostgresqlConnectionModel() {
     }
 
+    @Override
+    public String getDatabasename() {
+        return "Postgresql Database";
+    }
+
 }

@@ -14,6 +14,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
+import my.onn.jdbcadmin.connection.ConnectionModel;
 
 public class MainSceneController {
 
@@ -53,8 +54,10 @@ public class MainSceneController {
     @FXML
     private void onActionButtonAdd(ActionEvent event) {
 
-        if (ConnectionDialog.showConnectionDialog() != null) {
-            Button btn = new Button("New Connection");
+        ConnectionModel connectionModel = ConnectionDialog.showConnectionDialog();
+
+        if (connectionModel != null) {
+            Button btn = new Button(connectionModel.getDatabasename());
             btn.setOnAction(e -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Browser.fxml"));
