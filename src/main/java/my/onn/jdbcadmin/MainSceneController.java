@@ -13,7 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
-import my.onn.jdbcadmin.connection.ConnectionDialogController;
+import my.onn.jdbcadmin.connection.ConnectionDialog;
 
 public class MainSceneController {
 
@@ -53,7 +53,7 @@ public class MainSceneController {
     @FXML
     private void onActionButtonAdd(ActionEvent event) {
 
-        if (ConnectionDialogController.showConnectionDialog() != null) {
+        if (ConnectionDialog.showConnectionDialog() != null) {
             Button btn = new Button("New Connection");
             btn.setOnAction(e -> {
                 try {
