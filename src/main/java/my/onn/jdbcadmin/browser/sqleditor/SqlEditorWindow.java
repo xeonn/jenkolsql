@@ -17,6 +17,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
@@ -79,6 +80,16 @@ public class SqlEditorWindow extends Stage {
         tableViewResult.getColumns().addAll(col1,col2);
         
         tableViewResult.refresh();
+    }
+
+    @FXML
+    private void onActionSave(ActionEvent event) {
+        // Save to sql
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save as ...");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("SQL Files", "*.sql"));
+        fileChooser.setInitialFileName("New File");
+        fileChooser.showSaveDialog(this);
     }
     
 }
