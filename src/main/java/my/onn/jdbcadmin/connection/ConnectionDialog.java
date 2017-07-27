@@ -11,9 +11,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,14 +24,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import my.onn.jdbcadmin.connection.model.PostgresqlConnectionModel;
+import javafx.util.converter.NumberStringConverter;
 
 /**
  * FXML Controller class
@@ -72,9 +71,9 @@ public class ConnectionDialog extends Stage {
         return connectionModel;
     }
 
-    public ConnectionDialog() throws IOException {
+    public ConnectionDialog(ConnectionModel model, Parent parent) throws IOException {
         this.parent = parent;
-        this.connectionModel = new SimpleObjectProperty<>(new PostgresqlConnectionModel());
+        this.connectionModel = new SimpleObjectProperty<>(model);
 
         FXMLLoader loader = new FXMLLoader(ConnectionDialog.class.getResource("/fxml/ConnectionDialog.fxml"));
         loader.setControllerFactory(c -> {
@@ -105,25 +104,37 @@ public class ConnectionDialog extends Stage {
                         textFieldPort.textProperty().isEmpty()).or(
                         textFieldUsername.textProperty().isEmpty())
         );
-        
-        initializeChoiceBox();
-    }
-    
-    private void initializeChoiceBox () {
+
         choiceBoxDbSystem.getItems().setAll(DatabaseSystemEnum.values());
-        choiceBoxDbSystem.getSelectionModel().selectFirst();
+        initializeConnectionInfo();
+    }
+
+    private void initializeConnectionInfo() {
+        if (connectionModel.get() != null) {
+            choiceBoxDbSystem.getSelectionModel().select(connectionModel.get().getDatabaseSystem());
+            textFieldHost.textProperty().bindBidirectional(connectionModel.get().hostProperty());
+            textFieldMaintenanceDB.textProperty().bindBidirectional(connectionModel.get().maintenanceDbProperty());
+            textFieldName.textProperty().bindBidirectional(connectionModel.get().nameProperty());
+            textFieldPassword.textProperty().bindBidirectional(connectionModel.get().passwordProperty());
+            Bindings.bindBidirectional(textFieldPort.textProperty(), connectionModel.get().portProperty(), new NumberStringConverter());
+            textFieldUsername.textProperty().bindBidirectional(connectionModel.get().usernameProperty());
+        } else {
+            choiceBoxDbSystem.getSelectionModel().selectFirst();
+        }
     }
 
     /**
      * Construct @ConnectionModel object by presenting Connection dialog to user
      *
      *
+     * @param model reference to existing connection model or null to create new
+     * connection
      * @return
      */
-    public static ConnectionModel showConnectionDialog() {
-        ConnectionModel cnn = null;
+    public static ConnectionModel showConnectionDialog(ConnectionModel model, Parent parent) {
+        ConnectionModel cnn = model;
         try {
-            ConnectionDialog dialog = new ConnectionDialog();
+            ConnectionDialog dialog = new ConnectionDialog(model, parent);
             logger.info("Showing dialog");
             dialog.showAndWait();
             logger.info("Done with the connection dialog");
@@ -165,8 +176,23 @@ public class ConnectionDialog extends Stage {
 
     @FXML
     private void onActionButtonOk(ActionEvent event) {
-        connectionModel.set(
-                DatabaseSystem.getConnectionModel(choiceBoxDbSystem.getSelectionModel().getSelectedItem()));
+
+        if (connectionModel.get() == null) {
+            ConnectionModel newModel = DatabaseSystem.getConnectionModel(choiceBoxDbSystem.getSelectionModel().getSelectedItem());
+            newModel.databaseSystemProperty().set(choiceBoxDbSystem.getSelectionModel().getSelectedItem());
+            newModel.setHost(textFieldHost.getText());
+            newModel.setMaintenanceDb(textFieldMaintenanceDB.getText());
+            newModel.setName(textFieldName.getText());
+            newModel.setPassword(textFieldPassword.getText());
+            newModel.setPort(Integer.parseInt(textFieldPort.getText()));
+            newModel.setUsername(textFieldUsername.getText());
+            connectionModel.set(newModel);
+        } else {
+            // Other properties are bound except for choicebox.
+            connectionModel.get().databaseSystemProperty().set(
+                    choiceBoxDbSystem.getSelectionModel().getSelectedItem());
+        }
+
         this.close();
     }
 

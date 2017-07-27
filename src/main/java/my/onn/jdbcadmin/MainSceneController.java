@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,6 +23,8 @@ import my.onn.jdbcadmin.connection.ConnectionModel;
 public class MainSceneController {
 
     Set<Button> connections = new TreeSet();
+    ObservableList<ConnectionModel> connectionModels;
+    private Stage stage;
 
     @FXML
     private TextField textFieldSearch;
@@ -28,6 +32,10 @@ public class MainSceneController {
     private Button buttonAdd;
     @FXML
     private TilePane tilePane;
+
+    public MainSceneController() {
+        connectionModels = FXCollections.observableArrayList();
+    }
 
     public void initialize() {
 
@@ -40,6 +48,8 @@ public class MainSceneController {
      * @throws IOException
      */
     void start(Stage stage) throws IOException {
+        this.stage = stage;
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainScene.fxml"));
         loader.setControllerFactory(c -> {
             return this;
@@ -48,15 +58,15 @@ public class MainSceneController {
         Scene scene = new Scene(loader.load());
         scene.getStylesheets().add("/styles/Styles.css");
 
-        stage.setTitle("JavaFX and Maven");
-        stage.setScene(scene);
-        stage.show();
+        this.stage.setTitle("JavaFX and Maven");
+        this.stage.setScene(scene);
+        this.stage.show();
     }
 
     @FXML
     private void onActionButtonAdd(ActionEvent event) {
 
-        ConnectionModel connectionModel = ConnectionDialog.showConnectionDialog();
+        ConnectionModel connectionModel = ConnectionDialog.showConnectionDialog(null, stage.getScene().getRoot());
 
         if (connectionModel != null) {
             Button btn = new Button(connectionModel.toString());
@@ -79,7 +89,9 @@ public class MainSceneController {
             MenuItem menuEdit = new MenuItem("Edit properties");
             MenuItem menuDelete = new MenuItem("Delete");
             menuEdit.setOnAction(e -> {
-                ConnectionDialog.showConnectionDialog();
+                ConnectionDialog.showConnectionDialog(
+                        connectionModels.get(tilePane.getChildren().indexOf(btn)),
+                        stage.getScene().getRoot());
             });
             menuDelete.setOnAction(e -> {
                 tilePane.getChildren().remove(btn);
@@ -87,6 +99,7 @@ public class MainSceneController {
             ContextMenu contextMenu = new ContextMenu(menuEdit, menuDelete);
             btn.setContextMenu(contextMenu);
 
+            connectionModels.add(connectionModel);
             tilePane.getChildren().add(btn);
         }
     }
