@@ -91,5 +91,14 @@ public class SqlEditorWindow extends Stage {
         fileChooser.setInitialFileName("New File");
         fileChooser.showSaveDialog(this);
     }
+
+    @FXML
+    private void onActionOpenFile(ActionEvent event) {
+            // Save to sql
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open SQL file");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("SQL Files", "*.sql"));
+        fileChooser.showOpenDialog(this);
+    }
     
 }

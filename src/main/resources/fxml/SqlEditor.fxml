@@ -35,8 +35,8 @@
    <top>
       <ButtonBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER_LEFT">
         <buttons>
+            <Button mnemonicParsing="false" onAction="#onActionOpenFile" text="Open file ..." />
           <Button mnemonicParsing="false" onAction="#onActionSave" text="Save" />
-            <Button mnemonicParsing="false" text="Undo" />
             <Button mnemonicParsing="false" onAction="#onButtonRun" text="Run" />
         </buttons>
          <BorderPane.margin>
