@@ -15,8 +15,8 @@
       <ToolBar prefHeight="40.0" prefWidth="200.0">
         <items>
           <Button fx:id="buttonRefresh" mnemonicParsing="false" text="Refresh" />
-            <Button fx:id="buttonSql" mnemonicParsing="false" text="SQL" />
-            <Button fx:id="buttonTable" mnemonicParsing="false" text="Table" />
+            <Button mnemonicParsing="false" onAction="#onActionButtonSqlEditor" text="SQL" />
+            <Button mnemonicParsing="false" text="Table" />
         </items>
       </ToolBar>
       <Label text="Database Brower" />
