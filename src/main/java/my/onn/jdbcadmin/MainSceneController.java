@@ -10,6 +10,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
@@ -72,6 +74,19 @@ public class MainSceneController {
                     Logger.getLogger(MainSceneController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
+
+            // Add context menu to remove the button
+            MenuItem menuEdit = new MenuItem("Edit properties");
+            MenuItem menuDelete = new MenuItem("Delete");
+            menuEdit.setOnAction(e -> {
+                ConnectionDialog.showConnectionDialog();
+            });
+            menuDelete.setOnAction(e -> {
+                tilePane.getChildren().remove(btn);
+            });
+            ContextMenu contextMenu = new ContextMenu(menuEdit, menuDelete);
+            btn.setContextMenu(contextMenu);
+
             tilePane.getChildren().add(btn);
         }
     }
