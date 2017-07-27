@@ -3,19 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package my.onn.jdbcadmin.connection;
+package my.onn.jdbcadmin.connection.model;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import my.onn.jdbcadmin.connection.ConnectionModel;
 
 /**
  *
  * @author onn
  */
-public abstract class ConnectionModel {
+public class MysqlConnectionModel extends ConnectionModel {
 
     @Override
     public String toString() {
-        throw new NotImplementedException();
+        return "MYSQL Server";
     }
-
+    
 }

@@ -11,14 +11,14 @@ import my.onn.jdbcadmin.connection.ConnectionModel;
  *
  * @author onn
  */
-public class PostgresqlConnectionModel implements ConnectionModel {
+public class PostgresqlConnectionModel extends ConnectionModel {
 
     public PostgresqlConnectionModel() {
     }
 
     @Override
-    public String getDatabasename() {
-        return "Postgresql Database";
+    public String toString() {
+        return "Postgresql Server";
     }
 
 }

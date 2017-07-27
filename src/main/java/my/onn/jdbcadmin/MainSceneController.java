@@ -57,7 +57,7 @@ public class MainSceneController {
         ConnectionModel connectionModel = ConnectionDialog.showConnectionDialog();
 
         if (connectionModel != null) {
-            Button btn = new Button(connectionModel.getDatabasename());
+            Button btn = new Button(connectionModel.toString());
             btn.setOnAction(e -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Browser.fxml"));

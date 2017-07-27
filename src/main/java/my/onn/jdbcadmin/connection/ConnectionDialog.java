@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,8 +21,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -41,11 +44,9 @@ public class ConnectionDialog extends Stage {
 
     Parent parent;
 
-    private final ObjectProperty<ConnectionModel> connectionModel;
+    private ObjectProperty<ConnectionModel> connectionModel;
     @FXML
     private Button buttonTestConnection;
-    @FXML
-    private Button buttonCancel;
     @FXML
     private Button buttonOk;
     @FXML
@@ -64,6 +65,8 @@ public class ConnectionDialog extends Stage {
     private StackPane stackPane;
     @FXML
     private BorderPane borderPane;
+    @FXML
+    private ChoiceBox<DatabaseSystemEnum> choiceBoxDbSystem;
 
     public ObjectProperty<ConnectionModel> connectionModel() {
         return connectionModel;
@@ -102,7 +105,13 @@ public class ConnectionDialog extends Stage {
                         textFieldPort.textProperty().isEmpty()).or(
                         textFieldUsername.textProperty().isEmpty())
         );
-
+        
+        initializeChoiceBox();
+    }
+    
+    private void initializeChoiceBox () {
+        choiceBoxDbSystem.getItems().setAll(DatabaseSystemEnum.values());
+        choiceBoxDbSystem.getSelectionModel().selectFirst();
     }
 
     /**
@@ -156,6 +165,14 @@ public class ConnectionDialog extends Stage {
 
     @FXML
     private void onActionButtonOk(ActionEvent event) {
+        connectionModel.set(
+                DatabaseSystem.getConnectionModel(choiceBoxDbSystem.getSelectionModel().getSelectedItem()));
+        this.close();
+    }
+
+    @FXML
+    private void onActionButtonCancel(ActionEvent event) {
+        connectionModel.setValue(null);
         this.close();
     }
 

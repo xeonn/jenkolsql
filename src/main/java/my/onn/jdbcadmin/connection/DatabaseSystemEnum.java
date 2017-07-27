@@ -5,17 +5,12 @@
  */
 package my.onn.jdbcadmin.connection;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 /**
  *
  * @author onn
  */
-public abstract class ConnectionModel {
-
-    @Override
-    public String toString() {
-        throw new NotImplementedException();
-    }
-
+public enum DatabaseSystemEnum {
+    MYSQL,
+    ORACLE,
+    POSTGRES;
 }
