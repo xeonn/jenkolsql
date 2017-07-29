@@ -69,7 +69,9 @@ public class MainSceneController {
         ConnectionModel connectionModel = ConnectionDialog.showConnectionDialog(null, stage.getScene().getRoot());
 
         if (connectionModel != null) {
-            Button btn = new Button(connectionModel.toString());
+            Button btn = new Button(connectionModel.getName() + "\n"
+                    + connectionModel.getHost()
+                    + "\n" + connectionModel.toString());
             btn.setOnAction(e -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Browser.fxml"));
@@ -89,9 +91,15 @@ public class MainSceneController {
             MenuItem menuEdit = new MenuItem("Edit properties");
             MenuItem menuDelete = new MenuItem("Delete");
             menuEdit.setOnAction(e -> {
-                ConnectionDialog.showConnectionDialog(
-                        connectionModels.get(tilePane.getChildren().indexOf(btn)),
-                        stage.getScene().getRoot());
+                int idx = tilePane.getChildren().indexOf(btn);
+                ConnectionModel newModel
+                        = ConnectionDialog.showConnectionDialog(
+                                connectionModels.get(idx),
+                                stage.getScene().getRoot());
+                connectionModels.set(idx, newModel);
+                btn.setText(newModel.getName() + "\n"
+                        + newModel.getHost() + "\n"
+                        + newModel.toString());
             });
             menuDelete.setOnAction(e -> {
                 tilePane.getChildren().remove(btn);
