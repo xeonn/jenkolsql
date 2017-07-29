@@ -106,6 +106,16 @@ public class ConnectionDialog extends Stage {
         );
 
         choiceBoxDbSystem.getItems().setAll(DatabaseSystemEnum.values());
+        choiceBoxDbSystem.getSelectionModel().selectedItemProperty().addListener(item -> {
+            if (item != null) {
+                DatabaseSystemEnum db = choiceBoxDbSystem.getSelectionModel().getSelectedItem();
+                textFieldHost.setPromptText(db.getHostPrompt());
+                textFieldMaintenanceDB.setPromptText(db.getMaintenanceDbPrompt());
+                textFieldPort.setPromptText(Integer.toString(db.getPortPrompt()));
+                textFieldUsername.setPromptText(db.getUsernamePrompt());
+            }
+        });
+        choiceBoxDbSystem.getSelectionModel().selectFirst();
         initializeConnectionInfo();
     }
 
@@ -118,8 +128,6 @@ public class ConnectionDialog extends Stage {
             textFieldPassword.textProperty().bindBidirectional(connectionModel.get().passwordProperty());
             Bindings.bindBidirectional(textFieldPort.textProperty(), connectionModel.get().portProperty(), new NumberStringConverter());
             textFieldUsername.textProperty().bindBidirectional(connectionModel.get().usernameProperty());
-        } else {
-            choiceBoxDbSystem.getSelectionModel().selectFirst();
         }
     }
 

@@ -11,7 +11,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  *
@@ -101,11 +100,6 @@ public abstract class ConnectionModel {
 
     public void setPassword(String password) {
         this.password.set(password);
-    }
-
-    @Override
-    public String toString() {
-        throw new NotImplementedException();
     }
 
     void setMaintenanceDb(String text) {
