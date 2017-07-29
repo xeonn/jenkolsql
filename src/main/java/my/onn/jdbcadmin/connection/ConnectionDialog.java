@@ -8,6 +8,7 @@ package my.onn.jdbcadmin.connection;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -25,11 +26,14 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.TextFormatter.Change;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.NumberStringConverter;
 
 /**
@@ -87,6 +91,7 @@ public class ConnectionDialog extends Stage {
      * Initializes the controller class.
      */
     public void initialize() {
+
         // Enable Test and OK button once all information are available
         buttonOk.disableProperty().bind(
                 textFieldHost.textProperty().isEmpty().or(
@@ -113,6 +118,16 @@ public class ConnectionDialog extends Stage {
                 textFieldMaintenanceDB.setPromptText(db.getMaintenanceDbPrompt());
                 textFieldPort.setPromptText(Integer.toString(db.getPortPrompt()));
                 textFieldUsername.setPromptText(db.getUsernamePrompt());
+
+                // Number only field
+                UnaryOperator<Change> integerFilter = c -> {
+                    String newText = c.getControlNewText();
+                    if (newText.matches("([1-9][0-9]*)?")) {
+                        return c;
+                    }
+                    return null;
+                };
+                textFieldPort.setTextFormatter(new TextFormatter<>(new IntegerStringConverter(), db.getPortPrompt(), integerFilter));
             }
         });
         choiceBoxDbSystem.getSelectionModel().selectFirst();
