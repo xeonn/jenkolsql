@@ -94,20 +94,12 @@ public class ConnectionDialog extends Stage {
 
         // Enable Test and OK button once all information are available
         buttonOk.disableProperty().bind(
-                textFieldHost.textProperty().isEmpty().or(
-                        textFieldMaintenanceDB.textProperty().isEmpty()).or(
-                        textFieldName.textProperty().isEmpty()).or(
-                        textFieldPassword.textProperty().isEmpty()).or(
-                        textFieldPort.textProperty().isEmpty()).or(
-                        textFieldUsername.textProperty().isEmpty())
+                textFieldName.textProperty().isEmpty().or(
+                        textFieldPassword.textProperty().isEmpty())
         );
         buttonTestConnection.disableProperty().bind(
-                textFieldHost.textProperty().isEmpty().or(
-                        textFieldMaintenanceDB.textProperty().isEmpty()).or(
-                        textFieldName.textProperty().isEmpty()).or(
-                        textFieldPassword.textProperty().isEmpty()).or(
-                        textFieldPort.textProperty().isEmpty()).or(
-                        textFieldUsername.textProperty().isEmpty())
+                textFieldName.textProperty().isEmpty().or(
+                        textFieldPassword.textProperty().isEmpty())
         );
 
         choiceBoxDbSystem.getItems().setAll(DatabaseSystemEnum.values());
@@ -203,12 +195,16 @@ public class ConnectionDialog extends Stage {
         if (connectionModel.get() == null) {
             ConnectionModel newModel = DatabaseSystem.getConnectionModel(choiceBoxDbSystem.getSelectionModel().getSelectedItem());
             newModel.databaseSystemProperty().set(choiceBoxDbSystem.getSelectionModel().getSelectedItem());
-            newModel.setHost(textFieldHost.getText());
-            newModel.setMaintenanceDb(textFieldMaintenanceDB.getText());
+            newModel.setHost(textFieldHost.getText().isEmpty()
+                    ? textFieldHost.getPromptText() : textFieldHost.getText());
+            newModel.setMaintenanceDb(textFieldMaintenanceDB.getText().isEmpty()
+                    ? textFieldMaintenanceDB.getPromptText() : textFieldMaintenanceDB.getText());
             newModel.setName(textFieldName.getText());
             newModel.setPassword(textFieldPassword.getText());
-            newModel.setPort(Integer.parseInt(textFieldPort.getText()));
-            newModel.setUsername(textFieldUsername.getText());
+            newModel.setPort(Integer.parseInt(textFieldPort.getText().isEmpty()
+                    ? textFieldPort.getPromptText() : textFieldPort.getText()));
+            newModel.setUsername(textFieldUsername.getText().isEmpty()
+                    ? textFieldUsername.getPromptText() : textFieldUsername.getText());
             connectionModel.set(newModel);
         } else {
             // Other properties are bound except for choicebox.
