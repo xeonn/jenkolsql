@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
@@ -72,6 +73,7 @@ public class MainSceneController {
             Button btn = new Button(connectionModel.getName() + "\n"
                     + connectionModel.getHost()
                     + "\n" + connectionModel.toString());
+            btn.setGraphic(new ImageView(connectionModel.getDatabaseSystem().getImage()));
             btn.setOnAction(e -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Browser.fxml"));

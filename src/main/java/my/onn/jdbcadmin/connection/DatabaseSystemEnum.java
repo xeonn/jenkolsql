@@ -5,6 +5,8 @@
  */
 package my.onn.jdbcadmin.connection;
 
+import javafx.scene.image.Image;
+
 /**
  *
  * @author onn
@@ -31,6 +33,11 @@ public enum DatabaseSystemEnum {
             return "root";
         }
 
+        @Override
+        public Image getImage() {
+            return new Image("images/mysql_512x512.png");
+        }
+
     },
     ORACLE {
         @Override
@@ -51,6 +58,11 @@ public enum DatabaseSystemEnum {
         @Override
         public String getUsernamePrompt() {
             return "sys";
+        }
+
+        @Override
+        public Image getImage() {
+            return new Image("images/oracledb_512x512.png");
         }
     },
     POSTGRES {
@@ -73,6 +85,11 @@ public enum DatabaseSystemEnum {
         public String getUsernamePrompt() {
             return "postgres";
         }
+
+        @Override
+        public Image getImage() {
+            return new Image("images/postgresql_512x512.png");
+        }
     };
 
     public abstract String getMaintenanceDbPrompt();
@@ -82,4 +99,6 @@ public enum DatabaseSystemEnum {
     public abstract int getPortPrompt();
 
     public abstract String getUsernamePrompt();
+
+    public abstract Image getImage();
 }
