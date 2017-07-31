@@ -35,7 +35,7 @@ public enum DatabaseSystemEnum {
 
         @Override
         public Image getImage() {
-            return new Image("images/mysql_512x512.png");
+            return new Image("images/mysql_160x160.png");
         }
 
     },
@@ -62,7 +62,7 @@ public enum DatabaseSystemEnum {
 
         @Override
         public Image getImage() {
-            return new Image("images/oracledb_512x512.png");
+            return new Image("images/oracle_160x160.png");
         }
     },
     POSTGRES {
@@ -88,7 +88,7 @@ public enum DatabaseSystemEnum {
 
         @Override
         public Image getImage() {
-            return new Image("images/postgresql_512x512.png");
+            return new Image("images/postgresql_160x160.png");
         }
     };
 
