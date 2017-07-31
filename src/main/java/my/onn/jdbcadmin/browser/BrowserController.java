@@ -9,15 +9,20 @@ import java.io.IOException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.layout.VBox;
-import my.onn.jdbcadmin.browser.sqleditor.SqlEditorWindow;
+import javax.inject.Inject;
+import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
+import my.onn.jdbcadmin.ui.util.FxmlStage;
+import my.onn.jdbcadmin.ui.util.FxmlUI;
 
 /**
  * FXML Controller class
  *
  * @author onn
  */
-public class BrowserController extends VBox {
+public class BrowserController extends FxmlStage {
+
+    @Inject
+    FxmlControllerProducer fxmlControllerProducer;
 
     @FXML
     private Button buttonRefresh;
@@ -31,8 +36,7 @@ public class BrowserController extends VBox {
 
     @FXML
     private void onActionButtonSqlEditor(ActionEvent event) throws IOException {
-        SqlEditorWindow window = new SqlEditorWindow();
-        window.show();
+        fxmlControllerProducer.getFxmlDialog(FxmlUI.SQLEDITOR).show();
     }
 
 }

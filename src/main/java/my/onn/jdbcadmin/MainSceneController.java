@@ -88,19 +88,7 @@ public class MainSceneController {
                     + "\n" + connectionModel.toString());
             btn.setGraphic(new ImageView(connectionModel.getDatabaseSystem().getImage()));
             btn.setOnAction(e -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Browser.fxml"));
-                    loader.setResources(resources.getBundle());
-
-                    Stage stage = new Stage();
-                    stage.setTitle(resources.getString("database.browser.title"));
-                    Scene scene = new Scene(loader.load());
-                    stage.setScene(scene);
-                    stage.show();
-
-                } catch (IOException ex) {
-                    Logger.getLogger(MainSceneController.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                fxmlControllerProducer.getFxmlDialog(FxmlUI.BROWSER).show();
             });
 
             // Add context menu to remove the button
