@@ -21,6 +21,7 @@ import javafx.stage.Stage;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.connection.ConnectionModel;
+import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 
 public class MainSceneController {
 
@@ -29,7 +30,10 @@ public class MainSceneController {
     private Stage stage;
 
     @Inject
-    MainResource resource;
+    MainResource resources;
+
+    @Inject
+    FxmlControllerProducer fxmlControllerProducer;
 
     @FXML
     private TextField textFieldSearch;
@@ -56,6 +60,7 @@ public class MainSceneController {
         this.stage = stage;
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainScene.fxml"));
+        loader.setResources(resources.getBundle());
         loader.setControllerFactory(c -> {
             return this;
         });
@@ -63,7 +68,7 @@ public class MainSceneController {
         Scene scene = new Scene(loader.load());
         scene.getStylesheets().add("/styles/Styles.css");
 
-        this.stage.setTitle(resource.getString("main.title"));
+        this.stage.setTitle(resources.getString("main.title"));
         this.stage.setScene(scene);
         this.stage.show();
     }
@@ -71,7 +76,9 @@ public class MainSceneController {
     @FXML
     private void onActionButtonAdd(ActionEvent event) {
 
-        ConnectionModel connectionModel = ConnectionDialog.showConnectionDialog(null, stage.getScene().getRoot());
+        ConnectionDialog dlg = fxmlControllerProducer.connectionDialogInstance(null);
+        dlg.showAndWait();
+        ConnectionModel connectionModel = dlg.connectionModel().get();
 
         if (connectionModel != null) {
             Button btn = new Button(connectionModel.getName() + "\n"
@@ -81,9 +88,10 @@ public class MainSceneController {
             btn.setOnAction(e -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Browser.fxml"));
+                    loader.setResources(resources.getBundle());
 
                     Stage stage = new Stage();
-                    stage.setTitle(resource.getString("database.browser.title"));
+                    stage.setTitle(resources.getString("database.browser.title"));
                     Scene scene = new Scene(loader.load());
                     stage.setScene(scene);
                     stage.show();
@@ -94,14 +102,13 @@ public class MainSceneController {
             });
 
             // Add context menu to remove the button
-            MenuItem menuEdit = new MenuItem(resource.getString("contextmenu.edit.properties"));
-            MenuItem menuDelete = new MenuItem(resource.getString("contextmenu.delete"));
+            MenuItem menuEdit = new MenuItem(resources.getString("contextmenu.edit.properties"));
+            MenuItem menuDelete = new MenuItem(resources.getString("contextmenu.delete"));
             menuEdit.setOnAction(e -> {
                 int idx = tilePane.getChildren().indexOf(btn);
-                ConnectionModel newModel
-                        = ConnectionDialog.showConnectionDialog(
-                                connectionModels.get(idx),
-                                stage.getScene().getRoot());
+                ConnectionDialog dlgEdit = fxmlControllerProducer.connectionDialogInstance(connectionModels.get(idx));
+                dlgEdit.showAndWait();
+                ConnectionModel newModel = dlgEdit.connectionModel().get();
                 if (newModel != null) {
                     connectionModels.set(idx, newModel);
                     btn.setText(newModel.getName() + "\n"

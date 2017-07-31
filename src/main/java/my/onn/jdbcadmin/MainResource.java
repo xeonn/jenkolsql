@@ -28,4 +28,8 @@ public class MainResource {
     public String getString(String key) {
         return bundle.getString(key);
     }
+
+    public ResourceBundle getBundle() {
+        return bundle;
+    }
 }
