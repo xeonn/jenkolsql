@@ -98,10 +98,12 @@ public class MainSceneController {
                         = ConnectionDialog.showConnectionDialog(
                                 connectionModels.get(idx),
                                 stage.getScene().getRoot());
-                connectionModels.set(idx, newModel);
-                btn.setText(newModel.getName() + "\n"
-                        + newModel.getHost() + "\n"
-                        + newModel.toString());
+                if (newModel != null) {
+                    connectionModels.set(idx, newModel);
+                    btn.setText(newModel.getName() + "\n"
+                            + newModel.getHost() + "\n"
+                            + newModel.toString());
+                }
             });
             menuDelete.setOnAction(e -> {
                 tilePane.getChildren().remove(btn);
