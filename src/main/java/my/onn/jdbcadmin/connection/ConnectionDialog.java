@@ -6,6 +6,9 @@
 package my.onn.jdbcadmin.connection;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.UnaryOperator;
@@ -19,6 +22,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.PasswordField;
@@ -47,10 +51,11 @@ public class ConnectionDialog extends FxmlStage {
 
     Parent parent;
 
+    private ObjectProperty<ConnectionModel> connectionModel;
+
     @Inject
     MainResource resources;
 
-    private ObjectProperty<ConnectionModel> connectionModel;
     @FXML
     private Button buttonTestConnection;
     @FXML
@@ -155,15 +160,27 @@ public class ConnectionDialog extends FxmlStage {
         stackPane.getChildren().add(vbox);
 
         CompletableFuture.runAsync(() -> {
-            try {
-                logger.log(Level.INFO, "Simulating getting database connection, sleep for 3 seconds ..... in {0}", Thread.currentThread().getName());
-                Thread.sleep(5000);
-            } catch (InterruptedException ex) {
+            String url = "jdbc:postgresql://172.17.0.2/openbravo";
+            try (Connection cnn = DriverManager.getConnection(url, "postgres", "postgres")) {
+                if (cnn.isValid(2)) {
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Connection test");
+                        alert.setContentText("Connection successful");
+                        alert.showAndWait();
+                    });
+                }
+            } catch (SQLException ex) {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Connection test");
+                    alert.setContentText(ex.getLocalizedMessage());
+                    alert.showAndWait();
+                });
                 Logger.getLogger(ConnectionDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
         }).thenRun(() -> {
             Platform.runLater(() -> {
-                logger.log(Level.INFO, "thenApply .... in {0}", Thread.currentThread().getName());
                 stackPane.getChildren().remove(vbox);
                 borderPane.setDisable(false);
             });
