@@ -18,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
+import javax.inject.Inject;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 
@@ -26,6 +27,9 @@ public class MainSceneController {
     Set<Button> connections = new TreeSet();
     ObservableList<ConnectionModel> connectionModels;
     private Stage stage;
+
+    @Inject
+    MainResource resource;
 
     @FXML
     private TextField textFieldSearch;
@@ -59,7 +63,7 @@ public class MainSceneController {
         Scene scene = new Scene(loader.load());
         scene.getStylesheets().add("/styles/Styles.css");
 
-        this.stage.setTitle("JavaFX and Maven");
+        this.stage.setTitle(resource.getString("main.title"));
         this.stage.setScene(scene);
         this.stage.show();
     }
@@ -79,7 +83,7 @@ public class MainSceneController {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Browser.fxml"));
 
                     Stage stage = new Stage();
-                    stage.setTitle("Database Browser");
+                    stage.setTitle(resource.getString("database.browser.title"));
                     Scene scene = new Scene(loader.load());
                     stage.setScene(scene);
                     stage.show();
@@ -90,8 +94,8 @@ public class MainSceneController {
             });
 
             // Add context menu to remove the button
-            MenuItem menuEdit = new MenuItem("Edit properties");
-            MenuItem menuDelete = new MenuItem("Delete");
+            MenuItem menuEdit = new MenuItem(resource.getString("contextmenu.edit.properties"));
+            MenuItem menuDelete = new MenuItem(resource.getString("contextmenu.delete"));
             menuEdit.setOnAction(e -> {
                 int idx = tilePane.getChildren().indexOf(btn);
                 ConnectionModel newModel
