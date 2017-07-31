@@ -13,8 +13,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
-import my.onn.jdbcadmin.connection.ConnectionDialog;
-import my.onn.jdbcadmin.connection.ConnectionModel;
 import org.jboss.weld.environment.se.WeldContainer;
 
 /**
@@ -29,31 +27,26 @@ public final class FxmlControllerProducer {
     MainResource resources;
 
     @Inject
-    ConnectionDialog dialog;
-
-    @Inject
     public FxmlControllerProducer(WeldContainer container) {
         this.container = container;
     }
 
-    public ConnectionDialog connectionDialogInstance(ConnectionModel model) {
-        dialog.setConnectionModel(model);
-        return fxmlFactory(model);
-    }
-
-    private ConnectionDialog fxmlFactory(ConnectionModel model) {
+    public FxmlStage getFxmlDialog(FxmlUI fxmlUi) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ConnectionDialog.fxml"));
+            FxmlStage dialog = (FxmlStage) container.select(fxmlUi.getDialogClass()).get();
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlUi.getFxml()));
             loader.setResources(resources.getBundle());
             loader.setControllerFactory(c -> {
                 return dialog;
             });
 
-            dialog.setTitle(resources.getString("database.browser.title"));
+            dialog.setTitle(resources.getString(fxmlUi.getTitle()));
             dialog.setScene(new Scene((Parent) loader.load()));
+            return dialog;
         } catch (IOException ex) {
             Logger.getLogger(FxmlControllerProducer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return dialog;
+        throw new MissingUiDialogException("No instance of " + fxmlUi.getDialogClass().getName() + " exist");
     }
 }

@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
+import my.onn.jdbcadmin.ui.util.FxmlUI;
 
 public class MainSceneController {
 
@@ -76,9 +77,10 @@ public class MainSceneController {
     @FXML
     private void onActionButtonAdd(ActionEvent event) {
 
-        ConnectionDialog dlg = fxmlControllerProducer.connectionDialogInstance(null);
-        dlg.showAndWait();
-        ConnectionModel connectionModel = dlg.connectionModel().get();
+        ConnectionDialog newConnectionDialog
+                = (ConnectionDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.CONNECTION_DIALOG);
+        newConnectionDialog.showAndWait();
+        ConnectionModel connectionModel = newConnectionDialog.connectionModel().get();
 
         if (connectionModel != null) {
             Button btn = new Button(connectionModel.getName() + "\n"
@@ -106,9 +108,11 @@ public class MainSceneController {
             MenuItem menuDelete = new MenuItem(resources.getString("contextmenu.delete"));
             menuEdit.setOnAction(e -> {
                 int idx = tilePane.getChildren().indexOf(btn);
-                ConnectionDialog dlgEdit = fxmlControllerProducer.connectionDialogInstance(connectionModels.get(idx));
-                dlgEdit.showAndWait();
-                ConnectionModel newModel = dlgEdit.connectionModel().get();
+                ConnectionDialog editConnectionDialog
+                        = (ConnectionDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.CONNECTION_DIALOG);
+                editConnectionDialog.setConnectionModel(connectionModels.get(idx));
+                editConnectionDialog.showAndWait();
+                ConnectionModel newModel = editConnectionDialog.connectionModel().get();
                 if (newModel != null) {
                     connectionModels.set(idx, newModel);
                     btn.setText(newModel.getName() + "\n"

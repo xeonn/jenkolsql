@@ -30,18 +30,18 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
+import my.onn.jdbcadmin.ui.util.FxmlStage;
 
 /**
  * FXML Controller class
  *
  * @author onn
  */
-public class ConnectionDialog extends Stage {
+public class ConnectionDialog extends FxmlStage {
 
     private static final Logger logger = Logger.getLogger(ConnectionDialog.class.getName());
 
@@ -74,33 +74,21 @@ public class ConnectionDialog extends Stage {
     @FXML
     private ChoiceBox<DatabaseSystemEnum> choiceBoxDbSystem;
 
+    public ConnectionDialog() throws IOException {
+        this.connectionModel = new SimpleObjectProperty<>();
+    }
+
     public ObjectProperty<ConnectionModel> connectionModel() {
         return connectionModel;
     }
 
-//    public ConnectionDialog(ConnectionModel model, Parent parent) throws IOException {
-//        this.parent = parent;
-//        this.connectionModel = null;//new SimpleObjectProperty<>(model);
-//
-//        FXMLLoader loader = new FXMLLoader(ConnectionDialog.class.getResource("/fxml/ConnectionDialog.fxml"));
-//        loader.setResources(resources.getBundle());
-//        loader.setControllerFactory(c -> {
-//            return this;
-//        });
-//
-//        setTitle(resources.getString("database.browser.title"));
-//        setScene(new Scene((Parent) loader.load()));
-//    }
     public void setParent(Parent parent) {
         this.parent = parent;
     }
 
-    public ConnectionDialog() throws IOException {
-        this.connectionModel = null;//new SimpleObjectProperty<>(model);
-    }
-
     public void setConnectionModel(ConnectionModel model) {
-        this.connectionModel = new SimpleObjectProperty<>(model);
+        this.connectionModel.set(model);
+        setConnectionInfo();
     }
 
     /**
@@ -139,10 +127,10 @@ public class ConnectionDialog extends Stage {
             }
         });
         choiceBoxDbSystem.getSelectionModel().selectFirst();
-        initializeConnectionInfo();
+        setConnectionInfo();
     }
 
-    private void initializeConnectionInfo() {
+    private void setConnectionInfo() {
         if (connectionModel.get() != null) {
             choiceBoxDbSystem.getSelectionModel().select(connectionModel.get().getDatabaseSystem());
             textFieldHost.textProperty().bindBidirectional(connectionModel.get().hostProperty());
@@ -154,28 +142,6 @@ public class ConnectionDialog extends Stage {
         }
     }
 
-    /**
-     * Construct @ConnectionModel object by presenting Connection dialog to user
-     *
-     *
-     * @param model reference to existing connection model or null to create new
-     * connection
-     * @return
-     */
-//    public static ConnectionModel showConnectionDialog(ConnectionModel model, Parent parent) {
-//        ConnectionModel cnn = model;
-//        try {
-//            ConnectionDialog dialog = new ConnectionDialog(model, parent);
-//            logger.info("Showing dialog");
-//            dialog.showAndWait();
-//            logger.info("Done with the connection dialog");
-//            cnn = dialog.connectionModel.get();
-//
-//        } catch (IOException ex) {
-//            Logger.getLogger(ConnectionDialog.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return cnn;
-//    }
     @FXML
     private void onActionButtonTestConnection(ActionEvent event) throws InterruptedException, ExecutionException {
         borderPane.setDisable(true);
