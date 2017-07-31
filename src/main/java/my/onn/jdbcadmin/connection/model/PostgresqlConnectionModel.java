@@ -21,4 +21,10 @@ public class PostgresqlConnectionModel extends ConnectionModel {
         return "Postgresql Server";
     }
 
+    @Override
+    public String getUrl() {
+        return String.format("jdbc:postgresql://%s:%d/%s",
+                getHost(), getPort(), getMaintenanceDb());
+    }
+
 }

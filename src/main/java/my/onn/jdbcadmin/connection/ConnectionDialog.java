@@ -160,13 +160,34 @@ public class ConnectionDialog extends FxmlStage {
         stackPane.getChildren().add(vbox);
 
         CompletableFuture.runAsync(() -> {
-            String url = "jdbc:postgresql://172.17.0.2/openbravo";
-            try (Connection cnn = DriverManager.getConnection(url, "postgres", "postgres")) {
+            // setup temporary connection model for testing purpose
+            DatabaseSystemEnum dbe = choiceBoxDbSystem.getSelectionModel().getSelectedItem();
+            String host = textFieldHost.getText().isEmpty()
+                    ? textFieldHost.getPromptText() : textFieldHost.getText();
+            String maintenanceDb = textFieldMaintenanceDB.getText().isEmpty()
+                    ? textFieldMaintenanceDB.getPromptText() : textFieldMaintenanceDB.getText();
+            String name = textFieldName.getText();
+            String password = textFieldPassword.getText();
+            int port = Integer.parseInt(textFieldPort.getText().isEmpty()
+                    ? textFieldPort.getPromptText() : textFieldPort.getText());
+            String username = textFieldUsername.getText().isEmpty()
+                    ? textFieldUsername.getPromptText() : textFieldUsername.getText();
+
+            ConnectionModel cm = DatabaseSystem.getConnectionModel(dbe);
+            cm.setHost(host);
+            cm.setMaintenanceDb(maintenanceDb);
+            cm.setName(name);
+            cm.setPassword(password);
+            cm.setPort(port);
+            cm.setUsername(username);
+
+            try (Connection cnn = DriverManager.getConnection(cm.getUrl(), cm.getUsername(), cm.getPassword())) {
                 if (cnn.isValid(2)) {
                     Platform.runLater(() -> {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Connection test");
-                        alert.setContentText("Connection successful");
+                        alert.setHeaderText("Connection successful!!");
+                        alert.setContentText(dbe.name());
                         alert.showAndWait();
                     });
                 }

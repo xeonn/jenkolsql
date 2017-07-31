@@ -106,4 +106,6 @@ public abstract class ConnectionModel {
         maintenanceDb.set(text);
     }
 
+    public abstract String getUrl();
+
 }

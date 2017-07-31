@@ -17,5 +17,10 @@ public class MysqlConnectionModel extends ConnectionModel {
     public String toString() {
         return "MYSQL Server";
     }
-    
+
+    @Override
+    public String getUrl() {
+        return String.format("jdbc:mysql://%s:%d/%s",
+                getHost(), getPort(), getMaintenanceDb());
+    }
 }

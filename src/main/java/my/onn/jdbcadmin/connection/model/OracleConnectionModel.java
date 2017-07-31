@@ -17,5 +17,10 @@ public class OracleConnectionModel extends ConnectionModel {
     public String toString() {
         return "Oracle Server";
     }
-    
+
+    @Override
+    public String getUrl() {
+        return String.format("jdbc:oracle://%s:%d/%s",
+                getHost(), getPort(), getMaintenanceDb());
+    }
 }
