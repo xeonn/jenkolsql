@@ -19,8 +19,15 @@ public class OracleConnectionModel extends ConnectionModel {
     }
 
     @Override
-    public String getUrl() {
+    public String getUrl(String database) {
         return String.format("jdbc:oracle://%s:%d/%s",
-                getHost(), getPort(), getMaintenanceDb());
+                getHost(), getPort(),
+                (database == null || database.isEmpty() ? getMaintenanceDb() : database));
+    }
+
+    @Override
+    public String getMaintenanceUrl() {
+        return String.format("jdbc:oracle://%s:%d/?",
+                getHost(), getPort());
     }
 }

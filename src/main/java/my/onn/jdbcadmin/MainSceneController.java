@@ -17,6 +17,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 import javax.inject.Inject;
+import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
@@ -86,7 +87,9 @@ public class MainSceneController {
                     + "\n" + connectionModel.toString());
             btn.setGraphic(new ImageView(connectionModel.getDatabaseSystem().getImage()));
             btn.setOnAction(e -> {
-                fxmlControllerProducer.getFxmlDialog(FxmlUI.BROWSER).show();
+                BrowserController browser = (BrowserController) fxmlControllerProducer.getFxmlDialog(FxmlUI.BROWSER);
+                browser.setConnectionModel(connectionModel);
+                browser.show();
             });
 
             // Add context menu to remove the button

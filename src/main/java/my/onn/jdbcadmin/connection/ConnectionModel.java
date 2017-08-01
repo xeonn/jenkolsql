@@ -106,6 +106,25 @@ public abstract class ConnectionModel {
         maintenanceDb.set(text);
     }
 
-    public abstract String getUrl();
+    /**
+     * Provide url for a specific database
+     *
+     * Used in database browser window
+     *
+     * @param database
+     * @return
+     */
+    public abstract String getUrl(String database);
+
+    public String getUrl() {
+        return getUrl(null);
+    }
+
+    /**
+     * Provide url string that can be used to list all database.
+     *
+     * @return
+     */
+    public abstract String getMaintenanceUrl();
 
 }

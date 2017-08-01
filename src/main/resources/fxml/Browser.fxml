@@ -22,7 +22,7 @@
       <Label text="Database Brower" />
       <SplitPane dividerPositions="0.3298368298368298">
          <items>
-            <TreeView prefHeight="200.0" prefWidth="200.0" />
+            <TreeView fx:id="treeView" prefHeight="200.0" prefWidth="200.0" />
             <VBox>
                <children>
                   <TableView prefHeight="200.0" prefWidth="200.0">
