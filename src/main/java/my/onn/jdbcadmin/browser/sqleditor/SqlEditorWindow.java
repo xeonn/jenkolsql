@@ -5,9 +5,17 @@
  */
 package my.onn.jdbcadmin.browser.sqleditor;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
@@ -26,7 +34,10 @@ public class SqlEditorWindow extends FxmlStage {
     @FXML
     private TextArea textAreaSql;
     @FXML
-    private TableView tableViewResult;
+    private TableView<ArrayList<String>> tableViewResult;
+    private String connectionUrl;
+    private String password;
+    private String username;
 
     /**
      * Initializes the controller class.
@@ -51,20 +62,44 @@ public class SqlEditorWindow extends FxmlStage {
             return;
         }
 
-        //TODO jdbc driver execute sql
-        // fill up the rows
-        ObservableList<String> row = FXCollections.observableArrayList();
-        row.add(strSql);
-        tableViewResult.getItems().add(row);
-
-        // Add column based on result metadata
-        TableColumn col1 = new TableColumn("Test Column 1");
-        col1.setCellValueFactory(c -> {
-            return new SimpleStringProperty(row.get(0));
-        });
-        TableColumn col2 = new TableColumn("Test Column 2");
+        tableViewResult.getItems().clear();
         tableViewResult.getColumns().clear();
-        tableViewResult.getColumns().addAll(col1, col2);
+        int columnCount = -1;
+
+        //TODO: Refactor to use model instead of directly to ui element (tableViewResult)
+        try (Connection cnn = DriverManager.getConnection(this.connectionUrl, this.username, this.password);
+                Statement stmt = cnn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                ResultSet result = stmt.executeQuery(strSql)) {
+
+            ResultSetMetaData rsm = result.getMetaData();
+            columnCount = rsm.getColumnCount();
+
+            // Create data model, an array of array limited to 100 records for now
+            List<ArrayList<String>> model = new ArrayList<>();
+
+            for (int n = 0; n < columnCount; n++) {
+                TableColumn<ArrayList<String>, String> col = new TableColumn<>(rsm.getColumnLabel(n + 1));
+                int i = n;
+                col.setCellValueFactory(c -> {
+                    return new SimpleStringProperty(c.getValue().get(i));
+                });
+                tableViewResult.getColumns().add(col);
+            }
+            //TODO: Buffer all record using some format, xml or json as mapped memory file
+            int count = 0;
+            while (result.next() && count < 100) {
+                ArrayList<String> cols = new ArrayList<>();
+
+                for (int n = 0; n < columnCount; n++) {
+                    cols.add(result.getString(n + 1));
+                }
+                tableViewResult.getItems().add(cols);
+                count++;
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         tableViewResult.refresh();
     }
@@ -88,4 +123,20 @@ public class SqlEditorWindow extends FxmlStage {
         fileChooser.showOpenDialog(this);
     }
 
+    public void setConnectionUrl(String url, String username, String password) {
+        if (url.isEmpty() || username.isEmpty()) {
+            throw new IllegalArgumentException("Database connection not available");
+        }
+        this.connectionUrl = url;
+        this.username = username;
+        this.password = password;
+    }
+
+    private ResultSet executeSql(String sql) throws SQLException {
+        try (Connection cnn = DriverManager.getConnection(this.connectionUrl, this.username, this.password);
+                Statement stmt = cnn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                ResultSet result = stmt.executeQuery(sql)) {
+            return result;
+        }
+    }
 }

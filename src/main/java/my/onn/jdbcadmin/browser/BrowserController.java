@@ -22,6 +22,7 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javax.inject.Inject;
+import my.onn.jdbcadmin.browser.sqleditor.SqlEditorWindow;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
@@ -45,12 +46,31 @@ public class BrowserController extends FxmlStage {
     private Button buttonRefresh;
     @FXML
     private TreeView<?> treeView;
+    @FXML
+    private Button buttonSqlEditor;
 
     /**
      * Initializes the controller class.
      */
     public void initialize() {
         // Connection not yet available here
+        buttonSqlEditor.setDisable(true);
+
+        /*
+        Get Connection for Sql editor from selected tree item.
+        Disable sql button if no child item selected or when root item is selected
+         */
+        treeView.getSelectionModel().selectedIndexProperty().addListener((obj, oldV, newV) -> {
+            if (newV.intValue() > 0) {
+                if (treeView.getSelectionModel().getSelectedItem().getParent() == null) {
+                    buttonSqlEditor.setDisable(true);
+                } else {
+                    buttonSqlEditor.setDisable(false);
+                }
+            } else {
+                buttonSqlEditor.setDisable(true);
+            }
+        });
     }
 
     /**
@@ -179,9 +199,35 @@ public class BrowserController extends FxmlStage {
         }
     }
 
+    private boolean isParentRoot(TreeItem item) {
+        return item.getParent().getParent() == null;
+    }
+
+    private TreeItem getDatabaseTreeItem(TreeItem item) {
+        /*If the root item itself is selected, sql editor button should have
+        been disabled and this function never called.
+         */
+        if (item == null) {
+            throw new IllegalStateException("This denotes a bug. Please contact developer");
+        }
+        if (isParentRoot(item)) {
+            return item;
+        } else {
+            return getDatabaseTreeItem(item.getParent());
+        }
+    }
+
     @FXML
     private void onActionButtonSqlEditor(ActionEvent event) throws IOException {
-        fxmlControllerProducer.getFxmlDialog(FxmlUI.SQLEDITOR).show();
+        /* Sql Editor shall work only with valid connection url*/
+        String database;
+        // find database of selected item url
+        TreeItem selectedItem = treeView.getSelectionModel().getSelectedItem();
+        database = (String) getDatabaseTreeItem(selectedItem).getValue();
+
+        SqlEditorWindow wnd = (SqlEditorWindow) fxmlControllerProducer.getFxmlDialog(FxmlUI.SQLEDITOR);
+        wnd.setConnectionUrl(model.getUrl(database), model.getUsername(), model.getPassword());
+        wnd.show();
     }
 
 }
