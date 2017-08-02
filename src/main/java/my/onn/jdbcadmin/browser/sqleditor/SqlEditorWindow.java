@@ -22,6 +22,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
+import javax.inject.Inject;
+import my.onn.jdbcadmin.MainResource;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
 
 /**
@@ -31,13 +33,17 @@ import my.onn.jdbcadmin.ui.util.FxmlStage;
  */
 public class SqlEditorWindow extends FxmlStage {
 
+    private String connectionUrl;
+    private String password;
+    private String username;
+
+    @Inject
+    MainResource resources;
+
     @FXML
     private TextArea textAreaSql;
     @FXML
     private TableView<ArrayList<String>> tableViewResult;
-    private String connectionUrl;
-    private String password;
-    private String username;
 
     /**
      * Initializes the controller class.
@@ -127,6 +133,9 @@ public class SqlEditorWindow extends FxmlStage {
         if (url.isEmpty() || username.isEmpty()) {
             throw new IllegalArgumentException("Database connection not available");
         }
+
+        this.setTitle(String.format("%s - [%s]", resources.getString("sqleditor.title"), url));
+
         this.connectionUrl = url;
         this.username = username;
         this.password = password;

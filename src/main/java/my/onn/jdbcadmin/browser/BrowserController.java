@@ -303,6 +303,7 @@ public class BrowserController extends FxmlStage {
 
         SqlEditorWindow wnd = (SqlEditorWindow) fxmlControllerProducer.getFxmlDialog(FxmlUI.SQLEDITOR);
         wnd.setConnectionUrl(connectionModel.getUrl(database), connectionModel.getUsername(), connectionModel.getPassword());
+        wnd.initOwner(this);
         wnd.show();
     }
 
