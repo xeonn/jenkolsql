@@ -37,7 +37,7 @@ public class BrowserController extends FxmlStage {
 
     private static final Logger logger = Logger.getLogger(BrowserController.class.getName());
 
-    ConnectionModel model;
+    ConnectionModel connectionModel;
 
     @Inject
     FxmlControllerProducer fxmlControllerProducer;
@@ -79,8 +79,8 @@ public class BrowserController extends FxmlStage {
      * @param model
      */
     public void setConnectionModel(ConnectionModel model) {
-        if (this.model == null) {
-            this.model = model;
+        if (this.connectionModel == null) {
+            this.connectionModel = model;
             logger.info("Connecting to " + model.getHost());
             try (Connection cnn = DriverManager.getConnection(model.getUrl(null), model.getUsername(), model.getPassword())) {
                 if (!cnn.isValid(2)) {
@@ -98,7 +98,7 @@ public class BrowserController extends FxmlStage {
             }
         } else {
             logger.warning(String.format("Connection exist [%s]. Ignoring new connection set %s",
-                    this.model.getUrl(null), model.getUrl(null)));
+                    this.connectionModel.getUrl(null), model.getUrl(null)));
         }
     }
 
@@ -108,10 +108,8 @@ public class BrowserController extends FxmlStage {
             TreeItem rootItem = new TreeItem(String.format("%s\n[%s:%d]", model.getName(), model.getHost(), model.getPort()));
             rootItem.setGraphic(new ImageView(new Image("icons/server_pg.png")));
 
-            // Database
-            PreparedStatement stmt = cnn.prepareStatement(
-                    "SELECT datname FROM pg_database WHERE datistemplate=false;",
-                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                TreeItem rootItem = new TreeItem(String.format("%s\n[%s:%d]", connectionModel.getName(), connectionModel.getHost(), connectionModel.getPort()));
+                rootItem.setGraphic(new ImageView(new Image("icons/server_pg.png")));
 
             ResultSet rsdatabase = stmt.executeQuery();
 
@@ -125,11 +123,8 @@ public class BrowserController extends FxmlStage {
                         model.getUrl(catalog),
                         model.getUsername(), model.getPassword())) {
 
-                    ResultSet schemas = cnnDb.getMetaData().getSchemas(catalog, null);
-                    while (schemas.next()) {
-                        String schema = schemas.getString(1);
-                        TreeItem si = new TreeItem(schema);
-                        si.setGraphic(new ImageView(new Image("icons/schema.png")));
+                    try (Connection cnnDb = DriverManager.getConnection(connectionModel.getUrl(catalog),
+                            connectionModel.getUsername(), connectionModel.getPassword())) {
 
                         /* Add TABLE to schema */
                         TreeItem ti = new TreeItem("Tables");
@@ -226,7 +221,7 @@ public class BrowserController extends FxmlStage {
         database = (String) getDatabaseTreeItem(selectedItem).getValue();
 
         SqlEditorWindow wnd = (SqlEditorWindow) fxmlControllerProducer.getFxmlDialog(FxmlUI.SQLEDITOR);
-        wnd.setConnectionUrl(model.getUrl(database), model.getUsername(), model.getPassword());
+        wnd.setConnectionUrl(connectionModel.getUrl(database), connectionModel.getUsername(), connectionModel.getPassword());
         wnd.show();
     }
 
