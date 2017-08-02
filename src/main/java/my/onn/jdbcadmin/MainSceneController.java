@@ -88,8 +88,9 @@ public class MainSceneController {
             btn.setGraphic(new ImageView(connectionModel.getDatabaseSystem().getImage()));
             btn.setOnAction(e -> {
                 BrowserController browser = (BrowserController) fxmlControllerProducer.getFxmlDialog(FxmlUI.BROWSER);
-                browser.setConnectionModel(connectionModel);
+                browser.initOwner(stage);
                 browser.show();
+                browser.setConnectionModel(connectionModel);
             });
 
             // Add context menu to remove the button
