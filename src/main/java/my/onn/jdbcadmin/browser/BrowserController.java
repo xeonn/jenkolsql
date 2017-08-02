@@ -299,7 +299,7 @@ public class BrowserController extends FxmlStage {
         String database;
         // find database of selected item url
         TreeItem selectedItem = treeView.getSelectionModel().getSelectedItem();
-        database = (String) getDatabaseTreeItem(selectedItem).getValue();
+        database = (String) getDatabaseTreeItem(selectedItem).getValue().toString();
 
         SqlEditorWindow wnd = (SqlEditorWindow) fxmlControllerProducer.getFxmlDialog(FxmlUI.SQLEDITOR);
         wnd.setConnectionUrl(connectionModel.getUrl(database), connectionModel.getUsername(), connectionModel.getPassword());
