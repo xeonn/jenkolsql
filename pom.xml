@@ -3,21 +3,29 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>my.onn</groupId>
-    <artifactId>JdbcAdmin</artifactId>
+    <artifactId>jenkolsql</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>JdbcAdmin</name>
+    <name>JenkolSQL</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>my.onn.jdbcadmin.MainApp</mainClass>
     </properties>
 
-    <organization>
-        <!-- Used as the 'Vendor' for JNLP generation -->
-        <name>Your Organisation</name>
-    </organization>
+    <developers>
+        <developer>
+            <id>xeonn</id>
+            <name>Onn Khairuddin bin Rahmat</name>
+            <email>onn.khairuddin@gmail.com</email>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>Asia/Kuala_Lumpur</timezone>
+        </developer>
+    </developers>
     
     <dependencies>
         
