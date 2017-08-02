@@ -6,14 +6,16 @@
 package my.onn.jdbcadmin.connection.model;
 
 import my.onn.jdbcadmin.connection.ConnectionModel;
+import my.onn.jdbcadmin.connection.DatabaseSystemEnum;
 
 /**
  *
  * @author onn
  */
-public class PostgresqlConnectionModel extends ConnectionModel {
+public final class PostgresqlConnectionModel extends ConnectionModel {
 
     public PostgresqlConnectionModel() {
+        this.databaseSystemProperty().setValue(DatabaseSystemEnum.POSTGRES);
     }
 
     @Override

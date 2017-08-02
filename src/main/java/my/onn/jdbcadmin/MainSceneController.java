@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.connection.ConnectionModel;
+import my.onn.jdbcadmin.connection.ConnectionProperties;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlUI;
 
@@ -28,6 +29,9 @@ public class MainSceneController {
     Set<Button> connections = new TreeSet();
     ObservableList<ConnectionModel> connectionModels;
     private Stage stage;
+
+    @Inject
+    ConnectionProperties connectionConfig;
 
     @Inject
     MainResource resources;
@@ -47,7 +51,10 @@ public class MainSceneController {
     }
 
     public void initialize() {
-
+        for (ConnectionModel cm : connectionConfig.getConnectionModels()) {
+            connectionModels.add(cm);
+        }
+        updateConnectionButton();
     }
 
     /**
@@ -73,15 +80,8 @@ public class MainSceneController {
         this.stage.show();
     }
 
-    @FXML
-    private void onActionButtonAdd(ActionEvent event) {
-
-        ConnectionDialog newConnectionDialog
-                = (ConnectionDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.CONNECTION_DIALOG);
-        newConnectionDialog.showAndWait();
-        ConnectionModel connectionModel = newConnectionDialog.connectionModel().get();
-
-        if (connectionModel != null) {
+    private void updateConnectionButton() {
+        for (ConnectionModel connectionModel : connectionModels) {
             Button btn = new Button(connectionModel.getName() + "\n"
                     + connectionModel.getHost()
                     + "\n" + connectionModel.toString());
@@ -116,8 +116,22 @@ public class MainSceneController {
             ContextMenu contextMenu = new ContextMenu(menuEdit, menuDelete);
             btn.setContextMenu(contextMenu);
 
-            connectionModels.add(connectionModel);
             tilePane.getChildren().add(btn);
+        }
+    }
+
+    @FXML
+    private void onActionButtonAdd(ActionEvent event) {
+
+        ConnectionDialog newConnectionDialog
+                = (ConnectionDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.CONNECTION_DIALOG);
+        newConnectionDialog.showAndWait();
+        ConnectionModel connectionModel = newConnectionDialog.connectionModel().get();
+
+        if (connectionModel != null) {
+            connectionModels.add(connectionModel);
+            connectionConfig.addConnectionModel(connectionModel);
+            updateConnectionButton();
         }
     }
 }

@@ -6,12 +6,17 @@
 package my.onn.jdbcadmin.connection.model;
 
 import my.onn.jdbcadmin.connection.ConnectionModel;
+import my.onn.jdbcadmin.connection.DatabaseSystemEnum;
 
 /**
  *
  * @author onn
  */
-public class OracleConnectionModel extends ConnectionModel {
+public final class OracleConnectionModel extends ConnectionModel {
+
+    public OracleConnectionModel() {
+        this.databaseSystemProperty().setValue(DatabaseSystemEnum.ORACLE);
+    }
 
     @Override
     public String toString() {
