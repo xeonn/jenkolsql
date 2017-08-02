@@ -112,6 +112,11 @@ public class BrowserController extends FxmlStage {
                 }
             } catch (SQLException ex) {
                 logger.log(Level.SEVERE, null, ex);
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setContentText(ex.getLocalizedMessage());
+                alert.showAndWait();
+                this.close();
             } catch (IOException ex) {
                 Logger.getLogger(BrowserController.class.getName()).log(Level.SEVERE, null, ex);
             }
