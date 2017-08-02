@@ -26,9 +26,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javax.inject.Inject;
@@ -37,6 +37,7 @@ import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
 import my.onn.jdbcadmin.ui.util.FxmlUI;
+import my.onn.jdbcadmin.ui.util.IconsEnum;
 
 /**
  * FXML Controller class
@@ -47,6 +48,14 @@ public class BrowserController extends FxmlStage {
 
     private static final Logger logger = Logger.getLogger(BrowserController.class.getName());
 
+    /**
+     * Model representation for TreeView component.
+     *
+     * Mostly modification of item will be done at the model object. The
+     * treeViewResult component are refreshed with this model only.
+     */
+    BrowserItem model = new BrowserItem("empty", IconsEnum.UNKNOWN);
+
     ConnectionModel connectionModel;
 
     @Inject
@@ -55,7 +64,7 @@ public class BrowserController extends FxmlStage {
     @FXML
     private Button buttonRefresh;
     @FXML
-    private TreeView<?> treeView;
+    private TreeView<BrowserItem> treeView;
     @FXML
     private Button buttonSqlEditor;
 
@@ -123,6 +132,8 @@ public class BrowserController extends FxmlStage {
         vbox.setPadding(new Insets(10.0));
         vbox.setSpacing(10.0);
 
+        dialog.initOwner(this);
+        dialog.initModality(Modality.WINDOW_MODAL);
         dialog.centerOnScreen();
         dialog.setAlwaysOnTop(true);
         dialog.setScene(scene);
@@ -133,8 +144,12 @@ public class BrowserController extends FxmlStage {
         return CompletableFuture.runAsync(() -> {
             try (Connection cnn = DriverManager.getConnection(connectionModel.getMaintenanceUrl(), connectionModel.getUsername(), connectionModel.getPassword())) {
 
-                TreeItem rootItem = new TreeItem(String.format("%s\n[%s:%d]", connectionModel.getName(), connectionModel.getHost(), connectionModel.getPort()));
-                rootItem.setGraphic(new ImageView(new Image("icons/server_pg.png")));
+                model = new BrowserItem(
+                        String.format("%s\n[%s:%d]",
+                                connectionModel.getName(),
+                                connectionModel.getHost(),
+                                connectionModel.getPort()),
+                        IconsEnum.SERVER);
 
                 // Database
                 PreparedStatement stmt = cnn.prepareStatement(
@@ -146,8 +161,7 @@ public class BrowserController extends FxmlStage {
                 while (rsdatabase.next()) {
                     String catalog = rsdatabase.getString(1);
 
-                    TreeItem db = new TreeItem(catalog);
-                    db.setGraphic(new ImageView(new Image("icons/database.png")));
+                    BrowserItem db = new BrowserItem(catalog, IconsEnum.DATABASE);
 
                     try (Connection cnnDb = DriverManager.getConnection(connectionModel.getUrl(catalog),
                             connectionModel.getUsername(), connectionModel.getPassword())) {
@@ -155,27 +169,26 @@ public class BrowserController extends FxmlStage {
                         ResultSet schemas = cnnDb.getMetaData().getSchemas(catalog, null);
                         while (schemas.next()) {
                             String schema = schemas.getString(1);
-                            TreeItem si = new TreeItem(schema);
-                            si.setGraphic(new ImageView(new Image("icons/schema.png")));
+                            BrowserItem si = new BrowserItem(schema, IconsEnum.SCHEMA);
 
                             /* Add TABLE to schema */
-                            TreeItem ti = new TreeItem("Tables");
-                            ti.setGraphic(new ImageView(new Image("icons/notification.png")));
+                            BrowserItem ti = new BrowserItem("Tables", IconsEnum.NOTIFICATION);
+
                             String[] ttype = {"SYSTEM TABLE", "TABLE"};
                             ResultSet tables = cnnDb.getMetaData().getTables(catalog, schema, null, ttype);
                             while (tables.next()) {
 
                                 String table = tables.getString(3);
-                                TreeItem tti = new TreeItem(table);
-                                tti.setGraphic(new ImageView(new Image("icons/table-grid.png")));
+                                BrowserItem tti = new BrowserItem(table, IconsEnum.TABLEGRID);
 
                                 //Columns
                                 ResultSet columns = cnnDb.getMetaData().getColumns(null, null, table, null);
                                 while (columns.next()) {
 
-                                    TreeItem ci = new TreeItem(String.format("%s [%s(%s)]",
-                                            columns.getString(4), columns.getString(6), columns.getString(7)));
-                                    ci.setGraphic(new ImageView(new Image("icons/column.png")));
+                                    BrowserItem ci = new BrowserItem(String.format("%s [%s(%s)]",
+                                            columns.getString(4), columns.getString(6), columns.getString(7)),
+                                            IconsEnum.COLUMN);
+
                                     tti.getChildren().add(ci); // Add column to tables
                                 }
 
@@ -187,22 +200,20 @@ public class BrowserController extends FxmlStage {
                             }
 
                             /* Add VIEW to schema */
-                            TreeItem vi = new TreeItem("Views");
-                            vi.setGraphic(new ImageView(new Image("icons/screen.png")));
+                            BrowserItem vi = new BrowserItem("Views", IconsEnum.SCREEN);
                             String[] vtype = {"VIEW"};
                             ResultSet views = cnnDb.getMetaData().getTables(catalog, schema, null, vtype);
                             while (views.next()) {
                                 String view = views.getString(3);
-                                TreeItem vvi = new TreeItem(view);
-                                vvi.setGraphic(new ImageView(new Image("icons/open-book.png")));
+                                BrowserItem vvi = new BrowserItem(view, IconsEnum.OPENBOOK);
 
                                 //Columns
                                 ResultSet columns = cnnDb.getMetaData().getColumns(null, null, view, null);
                                 while (columns.next()) {
 
-                                    TreeItem ci = new TreeItem(String.format("%s [%s(%s)]",
-                                            columns.getString(4), columns.getString(6), columns.getString(7)));
-                                    ci.setGraphic(new ImageView(new Image("icons/column.png")));
+                                    BrowserItem ci = new BrowserItem(String.format("%s [%s(%s)]",
+                                            columns.getString(4), columns.getString(6), columns.getString(7)),
+                                            IconsEnum.COLUMN);
                                     vvi.getChildren().add(ci); // Add column to tables
                                 }
                                 vi.getChildren().add(vvi);
@@ -217,10 +228,9 @@ public class BrowserController extends FxmlStage {
                             }
                         }
                     }
-                    rootItem.getChildren().add(db);
+                    model.getChildren().add(db);
                 }
 
-                treeView.setRoot(rootItem);
             } catch (SQLException ex) {
                 Logger.getLogger(BrowserController.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -229,18 +239,46 @@ public class BrowserController extends FxmlStage {
 
     private void refreshTree() throws IOException {
         Stage dialog = startProgressDialog();
-        dialog.showAndWait();
 
-        fetchModel().thenRun(
-                () -> Platform.runLater(() -> {
-                    dialog.close();
-                }));
+        fetchModel().thenRun(() -> Platform.runLater(() -> {
+            // Fill up TreeView children from model
+            TreeItem rootItem = new TreeItem<>(model);
+            rootItem.setGraphic(new ImageView(model.getIcon().getImage()));
+            treeView.setRoot(rootItem);
+            addTreeItemRecursive(model, rootItem);
+            treeView.refresh();
+            dialog.close();
+        }));
+
+        dialog.show();
     }
 
+    private void addTreeItemRecursive(BrowserItem browserItem, TreeItem<BrowserItem> treeItem) {
+        for (BrowserItem sub : browserItem.getChildren()) {
+            TreeItem<BrowserItem> subItem = new TreeItem<>(sub);
+            subItem.setGraphic(new ImageView(sub.getIcon().getImage()));
+            treeItem.getChildren().add(subItem);
+
+            addTreeItemRecursive(sub, subItem);
+        }
+    }
+
+    /**
+     * UI handling element
+     *
+     * @param item
+     * @return
+     */
     private boolean isParentRoot(TreeItem item) {
         return item.getParent().getParent() == null;
     }
 
+    /**
+     * UI handling element
+     *
+     * @param item
+     * @return
+     */
     private TreeItem getDatabaseTreeItem(TreeItem item) {
         /*If the root item itself is selected, sql editor button should have
         been disabled and this function never called.
