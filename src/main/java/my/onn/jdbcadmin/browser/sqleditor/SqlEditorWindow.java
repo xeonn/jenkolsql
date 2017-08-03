@@ -5,6 +5,16 @@
  */
 package my.onn.jdbcadmin.browser.sqleditor;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -21,6 +31,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
@@ -37,6 +48,9 @@ public class SqlEditorWindow extends FxmlStage {
     private String password;
     private String username;
 
+    private String openedFile;
+    private String stageTitle;
+
     @Inject
     MainResource resources;
 
@@ -49,7 +63,16 @@ public class SqlEditorWindow extends FxmlStage {
      * Initializes the controller class.
      */
     public void initialize() {
-        // TODO
+        String fName = "/fonts/UbuntuMono-R.ttf";
+        InputStream is = SqlEditorWindow.class.getResourceAsStream(fName);
+        Font ubuntuFont = Font.loadFont(is, Font.getDefault().getSize() + 3);
+        textAreaSql.setFont(ubuntuFont);
+        try {
+            is.close();
+        } catch (IOException ex) {
+            Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     @FXML
@@ -116,8 +139,36 @@ public class SqlEditorWindow extends FxmlStage {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save as ...");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("SQL Files", "*.sql"));
-        fileChooser.setInitialFileName("New File");
-        fileChooser.showSaveDialog(this);
+
+        File oFile = null;
+
+        if (openedFile != null && !openedFile.isEmpty()) {
+            oFile = new File(openedFile);
+        }
+
+        if (oFile != null) {
+            fileChooser.setInitialDirectory(oFile.getParentFile());
+            fileChooser.setInitialFileName(oFile.getName());
+        } else {
+            fileChooser.setInitialFileName("New File");
+        }
+        File file = fileChooser.showSaveDialog(this);
+
+        if (file != null) {
+            try {
+                try (OutputStream os = new FileOutputStream(file);
+                        OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+                    osw.write(textAreaSql.getText());
+                    osw.flush();
+                    openedFile = file.getAbsolutePath();
+                    setTitle(stageTitle + " - [" + file.getName() + "]");
+                }
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     @FXML
@@ -126,7 +177,26 @@ public class SqlEditorWindow extends FxmlStage {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open SQL file");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("SQL Files", "*.sql"));
-        fileChooser.showOpenDialog(this);
+        File file = fileChooser.showOpenDialog(this);
+
+        if (file != null) {
+            try {
+                InputStream is = new FileInputStream(file);
+                InputStreamReader isr = new InputStreamReader(is);
+                int ch = -1;
+                StringBuilder sb = new StringBuilder();
+                while ((ch = isr.read()) > 0) {
+                    sb.append((char) ch);
+                }
+                textAreaSql.setText(sb.toString());
+                openedFile = file.getAbsolutePath();
+                setTitle(stageTitle + " - [" + file.getName() + "]");
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     public void setConnectionUrl(String url, String username, String password) {
@@ -134,7 +204,8 @@ public class SqlEditorWindow extends FxmlStage {
             throw new IllegalArgumentException("Database connection not available");
         }
 
-        this.setTitle(String.format("%s - [%s]", resources.getString("sqleditor.title"), url));
+        stageTitle = String.format("%s - [%s]", resources.getString("sqleditor.title"), url);
+        this.setTitle(stageTitle);
 
         this.connectionUrl = url;
         this.username = username;
