@@ -3,8 +3,8 @@ package my.onn.jdbcadmin;
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +15,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.browser.BrowserController;
@@ -27,7 +28,8 @@ import my.onn.jdbcadmin.ui.util.FxmlUI;
 public class MainSceneController {
 
     Set<Button> connections = new TreeSet();
-    ObservableList<ConnectionModel> connectionModels;
+    private ObservableSet<ConnectionModel> connectionModels;
+
     private Stage stage;
 
     @Inject
@@ -46,16 +48,28 @@ public class MainSceneController {
     @FXML
     private TilePane tilePane;
 
-    public MainSceneController() {
-        connectionModels = FXCollections.observableArrayList();
-    }
-
     public void initialize() {
-        connectionConfig.getConnectionModels().forEach((cm) -> {
-            connectionModels.add(cm);
-            createNewButton(cm);
-        });
+        connectionModels = connectionConfig.getConnectionModelsProperty();
+        connectionModels.stream().forEach(cm -> createNewButton(cm));
 
+        // Set up connection model listener to add/remove button
+        connectionModels.addListener(new SetChangeListener<ConnectionModel>() {
+            @Override
+            public void onChanged(SetChangeListener.Change<? extends ConnectionModel> c) {
+
+                if (c.wasAdded()) {
+                    createNewButton(c.getElementAdded());
+                }
+                if (c.wasRemoved()) {
+                    Button toRemove = (Button) tilePane.getChildren().stream()
+                            .filter(b -> b.getId().equals(c.getElementRemoved().getMaintenanceDb()))
+                            .findFirst().orElse(null);
+                    if (toRemove != null) {
+                        tilePane.getChildren().remove(toRemove);
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -83,14 +97,14 @@ public class MainSceneController {
 
     private void createNewButton(ConnectionModel connectionModel) {
         Button btn = new Button(connectionModel.getName() + "\n"
-                + connectionModel.getHost()
-                + "\n" + connectionModel.toString());
+                + connectionModel.getHost());
         btn.setId(connectionModel.getMaintenanceDb());
 
-        btn.setGraphic(new ImageView(connectionModel.getDatabaseSystem().getImage()));
+        btn.setGraphic(new ImageView(connectionModel.getDatabaseSystemEnum().getImage()));
         btn.setOnAction(e -> {
             BrowserController browser = (BrowserController) fxmlControllerProducer.getFxmlDialog(FxmlUI.BROWSER);
             browser.initOwner(stage);
+            browser.initModality(Modality.NONE);
             browser.show();
             browser.setConnectionModel(connectionModel);
         });
@@ -99,33 +113,29 @@ public class MainSceneController {
         MenuItem menuEdit = new MenuItem(resources.getString("contextmenu.edit.properties"));
         MenuItem menuDelete = new MenuItem(resources.getString("contextmenu.delete"));
         menuEdit.setOnAction(e -> {
-            int idx = tilePane.getChildren().indexOf(btn);
+            ConnectionModel modelToEdit = getConnectionModelFromButton(btn);
             ConnectionDialog editConnectionDialog
                     = (ConnectionDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.CONNECTION_DIALOG);
-            editConnectionDialog.setConnectionModel(connectionModels.get(idx));
+            editConnectionDialog.setConnectionModel(modelToEdit);
             editConnectionDialog.showAndWait();
             ConnectionModel newModel = editConnectionDialog.connectionModel().get();
             if (newModel != null) {
-                connectionModels.set(idx, newModel);
-                btn.setText(newModel.getName() + "\n"
-                        + newModel.getHost() + "\n"
-                        + newModel.toString());
+                // Using Remove/Add instead of Replace to trigger listevent
+                connectionModels.remove(modelToEdit);
+                connectionModels.add(newModel);
+//                updateButton(connectionModel, btn);
             }
         });
         menuDelete.setOnAction(e -> {
-            tilePane.getChildren().remove(btn);
+            ConnectionModel toRemove = getConnectionModelFromButton(btn);
+            if (toRemove != null) {
+                connectionModels.remove(toRemove);
+            }
+            //tilePane.getChildren().remove(btn);
         });
         ContextMenu contextMenu = new ContextMenu(menuEdit, menuDelete);
         btn.setContextMenu(contextMenu);
         tilePane.getChildren().add(btn);
-    }
-
-    private void updateButton(ConnectionModel connectionModel, Button button) {
-        button.setText(connectionModel.getName() + "\n"
-                + connectionModel.getHost()
-                + "\n" + connectionModel.toString());
-        button.setId(connectionModel.getMaintenanceDb());
-        button.setGraphic(new ImageView(connectionModel.getDatabaseSystem().getImage()));
     }
 
     @FXML
@@ -138,18 +148,17 @@ public class MainSceneController {
 
         if (connectionModel != null) {
             connectionModels.add(connectionModel);
-            connectionConfig.addConnectionModel(connectionModel);
-
-            Button btn
-                    = (Button) tilePane.getChildren().stream()
-                            .filter(b -> b.getId().equals(connectionModel.getMaintenanceDb()))
-                            .findFirst().orElse(null);
-
-            if (btn != null) {
-                updateButton(connectionModel, btn);
-            } else {
-                createNewButton(connectionModel);
-            }
         }
+    }
+
+    /**
+     *
+     * @param btn
+     * @return null if the model does not exist
+     */
+    private ConnectionModel getConnectionModelFromButton(Button btn) {
+        return connectionModels.stream()
+                .filter(c -> c.getMaintenanceDb().equals(btn.getId()))
+                .findFirst().orElse(null);
     }
 }

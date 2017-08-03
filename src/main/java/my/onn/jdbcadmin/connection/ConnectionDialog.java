@@ -15,7 +15,6 @@ import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -35,7 +34,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.IntegerStringConverter;
-import javafx.util.converter.NumberStringConverter;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
@@ -92,8 +90,8 @@ public class ConnectionDialog extends FxmlStage {
     }
 
     public void setConnectionModel(ConnectionModel model) {
-        this.connectionModel.set(model);
-        setConnectionInfo();
+        this.connectionModel.set(new ConnectionBuilder().copy(model));
+        updateFieldText();
     }
 
     /**
@@ -132,18 +130,18 @@ public class ConnectionDialog extends FxmlStage {
             }
         });
         choiceBoxDbSystem.getSelectionModel().selectFirst();
-        setConnectionInfo();
+        updateFieldText();
     }
 
-    private void setConnectionInfo() {
+    private void updateFieldText() {
         if (connectionModel.get() != null) {
-            choiceBoxDbSystem.getSelectionModel().select(connectionModel.get().getDatabaseSystem());
-            textFieldHost.textProperty().bindBidirectional(connectionModel.get().hostProperty());
-            textFieldMaintenanceDB.textProperty().bindBidirectional(connectionModel.get().maintenanceDbProperty());
-            textFieldName.textProperty().bindBidirectional(connectionModel.get().nameProperty());
-            textFieldPassword.textProperty().bindBidirectional(connectionModel.get().passwordProperty());
-            Bindings.bindBidirectional(textFieldPort.textProperty(), connectionModel.get().portProperty(), new NumberStringConverter());
-            textFieldUsername.textProperty().bindBidirectional(connectionModel.get().usernameProperty());
+            choiceBoxDbSystem.getSelectionModel().select(connectionModel.get().getDatabaseSystemEnum());
+            textFieldHost.setText(connectionModel.get().getHost());
+            textFieldMaintenanceDB.setText(connectionModel.get().getMaintenanceDb());
+            textFieldName.setText(connectionModel.get().getName());
+            textFieldPassword.setText(connectionModel.get().getPassword());
+            textFieldPort.setText(Integer.toString(connectionModel.get().getPort()));
+            textFieldUsername.setText(connectionModel.get().getUsername());
         }
     }
 
@@ -173,15 +171,17 @@ public class ConnectionDialog extends FxmlStage {
             String username = textFieldUsername.getText().isEmpty()
                     ? textFieldUsername.getPromptText() : textFieldUsername.getText();
 
-            ConnectionModel cm = DatabaseSystem.getConnectionModel(dbe);
-            cm.setHost(host);
-            cm.setMaintenanceDb(maintenanceDb);
-            cm.setName(name);
-            cm.setPassword(password);
-            cm.setPort(port);
-            cm.setUsername(username);
+            ConnectionModel cm = new ConnectionBuilder()
+                    .setDatabaseSystemEnum(dbe)
+                    .setHost(host)
+                    .setMaintenanceDb(maintenanceDb)
+                    .setName(name)
+                    .setPassword(password)
+                    .setPort(port)
+                    .setUsername(username)
+                    .build();
 
-            try (Connection cnn = DriverManager.getConnection(cm.getUrl(), cm.getUsername(), cm.getPassword())) {
+            try (Connection cnn = DriverManager.getConnection(cm.getUrl(null), cm.getUsername(), cm.getPassword())) {
                 if (cnn.isValid(2)) {
                     Platform.runLater(() -> {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -211,25 +211,20 @@ public class ConnectionDialog extends FxmlStage {
     @FXML
     private void onActionButtonOk(ActionEvent event) {
 
-        if (connectionModel.get() == null) {
-            ConnectionModel newModel = DatabaseSystem.getConnectionModel(choiceBoxDbSystem.getSelectionModel().getSelectedItem());
-            newModel.databaseSystemProperty().set(choiceBoxDbSystem.getSelectionModel().getSelectedItem());
-            newModel.setHost(textFieldHost.getText().isEmpty()
-                    ? textFieldHost.getPromptText() : textFieldHost.getText());
-            newModel.setMaintenanceDb(textFieldMaintenanceDB.getText().isEmpty()
-                    ? textFieldMaintenanceDB.getPromptText() : textFieldMaintenanceDB.getText());
-            newModel.setName(textFieldName.getText());
-            newModel.setPassword(textFieldPassword.getText());
-            newModel.setPort(Integer.parseInt(textFieldPort.getText().isEmpty()
-                    ? textFieldPort.getPromptText() : textFieldPort.getText()));
-            newModel.setUsername(textFieldUsername.getText().isEmpty()
-                    ? textFieldUsername.getPromptText() : textFieldUsername.getText());
-            connectionModel.set(newModel);
-        } else {
-            // Other properties are bound except for choicebox.
-            connectionModel.get().databaseSystemProperty().set(
-                    choiceBoxDbSystem.getSelectionModel().getSelectedItem());
-        }
+        ConnectionModel newModel = new ConnectionBuilder()
+                .setDatabaseSystemEnum(choiceBoxDbSystem.getSelectionModel().getSelectedItem())
+                .setHost(textFieldHost.getText().isEmpty()
+                        ? textFieldHost.getPromptText() : textFieldHost.getText())
+                .setMaintenanceDb(textFieldMaintenanceDB.getText().isEmpty()
+                        ? textFieldMaintenanceDB.getPromptText() : textFieldMaintenanceDB.getText())
+                .setName(textFieldName.getText())
+                .setPassword(textFieldPassword.getText())
+                .setPort(Integer.parseInt(textFieldPort.getText().isEmpty()
+                        ? textFieldPort.getPromptText() : textFieldPort.getText()))
+                .setUsername(textFieldUsername.getText().isEmpty()
+                        ? textFieldUsername.getPromptText() : textFieldUsername.getText())
+                .build();
+        connectionModel.set(newModel);
 
         this.close();
     }

@@ -13,97 +13,56 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 /**
+ * Immutable class to represent database connection information
  *
  * @author onn
  */
-public abstract class ConnectionModel {
+public final class ConnectionModel {
 
-    private ObjectProperty<DatabaseSystemEnum> databaseSystem = new SimpleObjectProperty<>();
-    private StringProperty maintenanceDb = new SimpleStringProperty();
-    private StringProperty name = new SimpleStringProperty();
-    private StringProperty host = new SimpleStringProperty();
-    private IntegerProperty port = new SimpleIntegerProperty();
-    private StringProperty username = new SimpleStringProperty();
-    private StringProperty password = new SimpleStringProperty();
+    private final DatabaseSystemEnum databaseSystem;
+    private final String maintenanceDb;
+    private final String name;
+    private final String host;
+    private final int port;
+    private final String username;
+    private final String password;
 
-    public ObjectProperty<DatabaseSystemEnum> databaseSystemProperty() {
+    public ConnectionModel(DatabaseSystemEnum databaseSystem, String maintenanceDb, String name, String host, int port, String username, String password) {
+        this.databaseSystem = databaseSystem;
+        this.maintenanceDb = maintenanceDb;
+        this.name = name;
+        this.host = host;
+        this.port = port;
+        this.username = username;
+        this.password = password;
+    }
+
+    public DatabaseSystemEnum getDatabaseSystemEnum() {
         return databaseSystem;
     }
 
-    public StringProperty maintenanceDbProperty() {
+    public String getMaintenanceDb() {
         return maintenanceDb;
     }
 
-    public StringProperty nameProperty() {
+    public String getName() {
         return name;
     }
 
-    public StringProperty hostProperty() {
+    public String getHost() {
         return host;
     }
 
-    public IntegerProperty portProperty() {
+    public int getPort() {
         return port;
     }
 
-    public StringProperty usernameProperty() {
+    public String getUsername() {
         return username;
     }
 
-    public StringProperty passwordProperty() {
-        return password;
-    }
-
-    public DatabaseSystemEnum getDatabaseSystem() {
-        return this.databaseSystem.get();
-    }
-
-    public String getMaintenanceDb() {
-        return maintenanceDb.get();
-    }
-
-    public String getName() {
-        return name.get();
-    }
-
-    public void setName(String name) {
-        this.name.set(name);
-    }
-
-    public String getHost() {
-        return host.get();
-    }
-
-    public void setHost(String host) {
-        this.host.set(host);
-    }
-
-    public int getPort() {
-        return port.get();
-    }
-
-    public void setPort(int port) {
-        this.port.set(port);
-    }
-
-    public String getUsername() {
-        return username.get();
-    }
-
-    public void setUsername(String username) {
-        this.username.set(username);
-    }
-
     public String getPassword() {
-        return password.get();
-    }
-
-    public void setPassword(String password) {
-        this.password.set(password);
-    }
-
-    void setMaintenanceDb(String text) {
-        maintenanceDb.set(text);
+        return password;
     }
 
     /**
@@ -111,20 +70,22 @@ public abstract class ConnectionModel {
      *
      * Used in database browser window
      *
-     * @param database
+     * @param database can be null to use specified maintenanceDb instead
      * @return
      */
-    public abstract String getUrl(String database);
-
-    public String getUrl() {
-        return getUrl(null);
+    public String getUrl(String database) {
+        if (database == null) {
+            return getMaintenanceUrl();
+        } else {
+            return String.format("%s://%s:%d/%s",
+                    getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
+                    database);
+        }
     }
 
-    /**
-     * Provide url string that can be used to list all database.
-     *
-     * @return
-     */
-    public abstract String getMaintenanceUrl();
+    public String getMaintenanceUrl() {
+        return String.format("%s://%s:%d/?",
+                getDatabaseSystemEnum().getProtocol(), getHost(), getPort());
+    }
 
 }

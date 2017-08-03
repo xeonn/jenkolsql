@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -42,20 +44,18 @@ public class ConnectionProperties {
 
     private final SortedProperties config;
 
-    private final Set<ConnectionModel> connectionModels = new HashSet<>();
+    private final ObservableSet<ConnectionModel> connectionModels = FXCollections.observableSet(new HashSet());
     private final String fileLocation = String.format("%s/%s.%s", System.getProperty("user.dir"), FILENAME, EXT);
 
     public ConnectionProperties() {
         this.config = new SortedProperties();
     }
 
-    public Set<ConnectionModel> getConnectionModels() {
+    public ObservableSet<ConnectionModel> getConnectionModelsProperty() {
         return connectionModels;
     }
 
-    public void addConnectionModel(ConnectionModel connectionModel) {
-
-        connectionModels.add(connectionModel);
+    private void setConnectionModelProperty(ConnectionModel connectionModel) {
 
         /* Example format for database connection key is
         connections.                        -- static identifier defined by ConnectionProperties.CONFIGROOT
@@ -65,10 +65,10 @@ public class ConnectionProperties {
          */
         String serverGroup
                 = CONFIGROOT + "."
-                + connectionModel.getDatabaseSystem().toString() + "."
+                + connectionModel.getDatabaseSystemEnum().toString() + "."
                 + connectionModel.getMaintenanceDb() + ".";
 
-        config.setProperty(serverGroup + "system", connectionModel.getDatabaseSystem().toString());
+        config.setProperty(serverGroup + "system", connectionModel.getDatabaseSystemEnum().toString());
         config.setProperty(serverGroup + "host", connectionModel.getHost());
         config.setProperty(serverGroup + "maintenancedb", connectionModel.getMaintenanceDb());
         config.setProperty(serverGroup + "name", connectionModel.getName());
@@ -103,13 +103,15 @@ public class ConnectionProperties {
                     groupKey.substring(
                             groupKey.indexOf(token) + 1,
                             groupKey.lastIndexOf(token)));
-            ConnectionModel cm = DatabaseSystem.getConnectionModel(dse);
-            cm.setHost(config.get(groupKey + ".host").toString());
-            cm.setMaintenanceDb(config.get(groupKey + ".maintenancedb").toString());
-            cm.setName(config.get(groupKey + ".name").toString());
-            cm.setPassword(config.get(groupKey + ".password").toString());
-            cm.setPort(Integer.parseInt(config.get(groupKey + ".port").toString()));
-            cm.setUsername(config.get(groupKey + ".username").toString());
+            ConnectionModel cm = new ConnectionBuilder()
+                    .setDatabaseSystemEnum(dse)
+                    .setHost(config.get(groupKey + ".host").toString())
+                    .setMaintenanceDb(config.get(groupKey + ".maintenancedb").toString())
+                    .setName(config.get(groupKey + ".name").toString())
+                    .setPassword(config.get(groupKey + ".password").toString())
+                    .setPort(Integer.parseInt(config.get(groupKey + ".port").toString()))
+                    .setUsername(config.get(groupKey + ".username").toString())
+                    .build();
 
             connectionModels.add(cm);
         }
@@ -134,6 +136,10 @@ public class ConnectionProperties {
 
     @PreDestroy
     void saveToDisk() {
+        config.clear();
+        connectionModels.stream()
+                .forEach(cm -> setConnectionModelProperty(cm));
+
         File file = new File(fileLocation);
         try (FileOutputStream fos = new FileOutputStream(file);
                 OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
