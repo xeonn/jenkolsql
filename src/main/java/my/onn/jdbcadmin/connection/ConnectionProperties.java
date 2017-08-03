@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -42,20 +44,18 @@ public class ConnectionProperties {
 
     private final SortedProperties config;
 
-    private final Set<ConnectionModel> connectionModels = new HashSet<>();
+    private final ObservableSet<ConnectionModel> connectionModels = FXCollections.observableSet(new HashSet());
     private final String fileLocation = String.format("%s/%s.%s", System.getProperty("user.dir"), FILENAME, EXT);
 
     public ConnectionProperties() {
         this.config = new SortedProperties();
     }
 
-    public Set<ConnectionModel> getConnectionModels() {
+    public ObservableSet<ConnectionModel> getConnectionModelsProperty() {
         return connectionModels;
     }
 
-    public void addConnectionModel(ConnectionModel connectionModel) {
-
-        connectionModels.add(connectionModel);
+    private void setConnectionModelProperty(ConnectionModel connectionModel) {
 
         /* Example format for database connection key is
         connections.                        -- static identifier defined by ConnectionProperties.CONFIGROOT
@@ -136,6 +136,10 @@ public class ConnectionProperties {
 
     @PreDestroy
     void saveToDisk() {
+        config.clear();
+        connectionModels.stream()
+                .forEach(cm -> setConnectionModelProperty(cm));
+
         File file = new File(fileLocation);
         try (FileOutputStream fos = new FileOutputStream(file);
                 OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {

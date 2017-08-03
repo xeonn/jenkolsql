@@ -3,9 +3,8 @@ package my.onn.jdbcadmin;
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,7 +28,8 @@ import my.onn.jdbcadmin.ui.util.FxmlUI;
 public class MainSceneController {
 
     Set<Button> connections = new TreeSet();
-    ObservableList<ConnectionModel> connectionModels;
+    private ObservableSet<ConnectionModel> connectionModels;
+
     private Stage stage;
 
     @Inject
@@ -48,38 +48,28 @@ public class MainSceneController {
     @FXML
     private TilePane tilePane;
 
-    public MainSceneController() {
-        connectionModels = FXCollections.observableArrayList();
-    }
-
     public void initialize() {
+        connectionModels = connectionConfig.getConnectionModelsProperty();
+        connectionModels.stream().forEach(cm -> createNewButton(cm));
 
         // Set up connection model listener to add/remove button
-        connectionModels.addListener(new ListChangeListener<ConnectionModel>() {
+        connectionModels.addListener(new SetChangeListener<ConnectionModel>() {
             @Override
-            public void onChanged(ListChangeListener.Change<? extends ConnectionModel> c) {
-                while (c.next()) {
-                    if (c.wasAdded()) {
-                        c.getAddedSubList().forEach(m -> createNewButton(m));
-                    }
-                    if (c.wasRemoved()) {
-                        c.getRemoved().forEach(m -> {
-                            Button toRemove = (Button) tilePane.getChildren().stream()
-                                    .filter(b -> b.getId().equals(m.getMaintenanceDb()))
-                                    .findFirst().orElse(null);
-                            if (toRemove != null) {
-                                tilePane.getChildren().remove(toRemove);
-                            }
-                        });
+            public void onChanged(SetChangeListener.Change<? extends ConnectionModel> c) {
+
+                if (c.wasAdded()) {
+                    createNewButton(c.getElementAdded());
+                }
+                if (c.wasRemoved()) {
+                    Button toRemove = (Button) tilePane.getChildren().stream()
+                            .filter(b -> b.getId().equals(c.getElementRemoved().getMaintenanceDb()))
+                            .findFirst().orElse(null);
+                    if (toRemove != null) {
+                        tilePane.getChildren().remove(toRemove);
                     }
                 }
             }
         });
-
-        connectionConfig.getConnectionModels().forEach((cm) -> {
-            connectionModels.add(cm);
-        });
-
     }
 
     /**
@@ -158,7 +148,6 @@ public class MainSceneController {
 
         if (connectionModel != null) {
             connectionModels.add(connectionModel);
-            connectionConfig.addConnectionModel(connectionModel);
         }
     }
 
