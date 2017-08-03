@@ -51,10 +51,11 @@ public class MainSceneController {
     }
 
     public void initialize() {
-        for (ConnectionModel cm : connectionConfig.getConnectionModels()) {
+        connectionConfig.getConnectionModels().forEach((cm) -> {
             connectionModels.add(cm);
-        }
-        updateConnectionButton();
+            createNewButton(cm);
+        });
+
     }
 
     /**
@@ -80,44 +81,51 @@ public class MainSceneController {
         this.stage.show();
     }
 
-    private void updateConnectionButton() {
-        for (ConnectionModel connectionModel : connectionModels) {
-            Button btn = new Button(connectionModel.getName() + "\n"
-                    + connectionModel.getHost()
-                    + "\n" + connectionModel.toString());
-            btn.setGraphic(new ImageView(connectionModel.getDatabaseSystem().getImage()));
-            btn.setOnAction(e -> {
-                BrowserController browser = (BrowserController) fxmlControllerProducer.getFxmlDialog(FxmlUI.BROWSER);
-                browser.initOwner(stage);
-                browser.show();
-                browser.setConnectionModel(connectionModel);
-            });
+    private void createNewButton(ConnectionModel connectionModel) {
+        Button btn = new Button(connectionModel.getName() + "\n"
+                + connectionModel.getHost()
+                + "\n" + connectionModel.toString());
+        btn.setId(connectionModel.getMaintenanceDb());
 
-            // Add context menu to remove the button
-            MenuItem menuEdit = new MenuItem(resources.getString("contextmenu.edit.properties"));
-            MenuItem menuDelete = new MenuItem(resources.getString("contextmenu.delete"));
-            menuEdit.setOnAction(e -> {
-                int idx = tilePane.getChildren().indexOf(btn);
-                ConnectionDialog editConnectionDialog
-                        = (ConnectionDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.CONNECTION_DIALOG);
-                editConnectionDialog.setConnectionModel(connectionModels.get(idx));
-                editConnectionDialog.showAndWait();
-                ConnectionModel newModel = editConnectionDialog.connectionModel().get();
-                if (newModel != null) {
-                    connectionModels.set(idx, newModel);
-                    btn.setText(newModel.getName() + "\n"
-                            + newModel.getHost() + "\n"
-                            + newModel.toString());
-                }
-            });
-            menuDelete.setOnAction(e -> {
-                tilePane.getChildren().remove(btn);
-            });
-            ContextMenu contextMenu = new ContextMenu(menuEdit, menuDelete);
-            btn.setContextMenu(contextMenu);
+        btn.setGraphic(new ImageView(connectionModel.getDatabaseSystem().getImage()));
+        btn.setOnAction(e -> {
+            BrowserController browser = (BrowserController) fxmlControllerProducer.getFxmlDialog(FxmlUI.BROWSER);
+            browser.initOwner(stage);
+            browser.show();
+            browser.setConnectionModel(connectionModel);
+        });
 
-            tilePane.getChildren().add(btn);
-        }
+        // Add context menu to remove the button
+        MenuItem menuEdit = new MenuItem(resources.getString("contextmenu.edit.properties"));
+        MenuItem menuDelete = new MenuItem(resources.getString("contextmenu.delete"));
+        menuEdit.setOnAction(e -> {
+            int idx = tilePane.getChildren().indexOf(btn);
+            ConnectionDialog editConnectionDialog
+                    = (ConnectionDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.CONNECTION_DIALOG);
+            editConnectionDialog.setConnectionModel(connectionModels.get(idx));
+            editConnectionDialog.showAndWait();
+            ConnectionModel newModel = editConnectionDialog.connectionModel().get();
+            if (newModel != null) {
+                connectionModels.set(idx, newModel);
+                btn.setText(newModel.getName() + "\n"
+                        + newModel.getHost() + "\n"
+                        + newModel.toString());
+            }
+        });
+        menuDelete.setOnAction(e -> {
+            tilePane.getChildren().remove(btn);
+        });
+        ContextMenu contextMenu = new ContextMenu(menuEdit, menuDelete);
+        btn.setContextMenu(contextMenu);
+        tilePane.getChildren().add(btn);
+    }
+
+    private void updateButton(ConnectionModel connectionModel, Button button) {
+        button.setText(connectionModel.getName() + "\n"
+                + connectionModel.getHost()
+                + "\n" + connectionModel.toString());
+        button.setId(connectionModel.getMaintenanceDb());
+        button.setGraphic(new ImageView(connectionModel.getDatabaseSystem().getImage()));
     }
 
     @FXML
@@ -131,7 +139,17 @@ public class MainSceneController {
         if (connectionModel != null) {
             connectionModels.add(connectionModel);
             connectionConfig.addConnectionModel(connectionModel);
-            updateConnectionButton();
+
+            Button btn
+                    = (Button) tilePane.getChildren().stream()
+                            .filter(b -> b.getId().equals(connectionModel.getMaintenanceDb()))
+                            .findFirst().orElse(null);
+
+            if (btn != null) {
+                updateButton(connectionModel, btn);
+            } else {
+                createNewButton(connectionModel);
+            }
         }
     }
 }
