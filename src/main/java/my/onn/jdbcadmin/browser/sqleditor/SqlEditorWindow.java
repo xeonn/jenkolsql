@@ -5,6 +5,8 @@
  */
 package my.onn.jdbcadmin.browser.sqleditor;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -21,6 +23,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
@@ -49,7 +52,15 @@ public class SqlEditorWindow extends FxmlStage {
      * Initializes the controller class.
      */
     public void initialize() {
-        // TODO
+        String fName = "/fonts/UbuntuMono-R.ttf";
+        InputStream is = SqlEditorWindow.class.getResourceAsStream(fName);
+        Font ubuntuFont = Font.loadFont(is, Font.getDefault().getSize() + 3);
+        textAreaSql.setFont(ubuntuFont);
+        try {
+            is.close();
+        } catch (IOException ex) {
+            Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @FXML
