@@ -65,10 +65,10 @@ public class ConnectionProperties {
          */
         String serverGroup
                 = CONFIGROOT + "."
-                + connectionModel.getDatabaseSystem().toString() + "."
+                + connectionModel.getDatabaseSystemEnum().toString() + "."
                 + connectionModel.getMaintenanceDb() + ".";
 
-        config.setProperty(serverGroup + "system", connectionModel.getDatabaseSystem().toString());
+        config.setProperty(serverGroup + "system", connectionModel.getDatabaseSystemEnum().toString());
         config.setProperty(serverGroup + "host", connectionModel.getHost());
         config.setProperty(serverGroup + "maintenancedb", connectionModel.getMaintenanceDb());
         config.setProperty(serverGroup + "name", connectionModel.getName());
@@ -103,13 +103,15 @@ public class ConnectionProperties {
                     groupKey.substring(
                             groupKey.indexOf(token) + 1,
                             groupKey.lastIndexOf(token)));
-            ConnectionModel cm = DatabaseSystem.getConnectionModel(dse);
-            cm.setHost(config.get(groupKey + ".host").toString());
-            cm.setMaintenanceDb(config.get(groupKey + ".maintenancedb").toString());
-            cm.setName(config.get(groupKey + ".name").toString());
-            cm.setPassword(config.get(groupKey + ".password").toString());
-            cm.setPort(Integer.parseInt(config.get(groupKey + ".port").toString()));
-            cm.setUsername(config.get(groupKey + ".username").toString());
+            ConnectionModel cm = new ConnectionBuilder()
+                    .setDatabaseSystemEnum(dse)
+                    .setHost(config.get(groupKey + ".host").toString())
+                    .setMaintenanceDb(config.get(groupKey + ".maintenancedb").toString())
+                    .setName(config.get(groupKey + ".name").toString())
+                    .setPassword(config.get(groupKey + ".password").toString())
+                    .setPort(Integer.parseInt(config.get(groupKey + ".port").toString()))
+                    .setUsername(config.get(groupKey + ".username").toString())
+                    .build();
 
             connectionModels.add(cm);
         }

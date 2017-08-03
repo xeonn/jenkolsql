@@ -5,29 +5,78 @@
  */
 package my.onn.jdbcadmin.connection;
 
-import static my.onn.jdbcadmin.connection.DatabaseSystemEnum.MYSQL;
-import static my.onn.jdbcadmin.connection.DatabaseSystemEnum.ORACLE;
-import static my.onn.jdbcadmin.connection.DatabaseSystemEnum.POSTGRES;
+import static my.onn.jdbcadmin.connection.DatabaseSystemEnum.*;
 import my.onn.jdbcadmin.connection.exception.DatabaseSystemNotSupportedException;
-import my.onn.jdbcadmin.connection.model.MysqlConnectionModel;
-import my.onn.jdbcadmin.connection.model.OracleConnectionModel;
-import my.onn.jdbcadmin.connection.model.PostgresqlConnectionModel;
 
 /**
  *
  * @author onn
  */
-public class DatabaseSystem {
-    public static ConnectionModel getConnectionModel(DatabaseSystemEnum dbSys) {
-        switch (dbSys) {
-            case MYSQL:
-                return new MysqlConnectionModel();
-            case ORACLE:
-                return new OracleConnectionModel();
-            case POSTGRES:
-                return new PostgresqlConnectionModel();
-            default:
-                throw new DatabaseSystemNotSupportedException();
-        }
+public class ConnectionBuilder {
+
+    private DatabaseSystemEnum databaseSystemEnum;
+    private String maintenanceDb;
+    private String name;
+    private String host;
+    private int port;
+    private String username;
+    private String password;
+
+    public ConnectionBuilder setDatabaseSystemEnum(DatabaseSystemEnum databaseSystem) {
+        this.databaseSystemEnum = databaseSystem;
+        return this;
+    }
+
+    public ConnectionBuilder setMaintenanceDb(String maintenanceDb) {
+        this.maintenanceDb = maintenanceDb;
+        return this;
+    }
+
+    public ConnectionBuilder setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public ConnectionBuilder setHost(String host) {
+        this.host = host;
+        return this;
+    }
+
+    public ConnectionBuilder setPort(int port) {
+        this.port = port;
+        return this;
+    }
+
+    public ConnectionBuilder setUsername(String username) {
+        this.username = username;
+        return this;
+    }
+
+    public ConnectionBuilder setPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
+    public ConnectionModel build() {
+        return new ConnectionModel(
+                databaseSystemEnum,
+                maintenanceDb,
+                name,
+                host,
+                port,
+                username,
+                password
+        );
+    }
+
+    public ConnectionModel copy(ConnectionModel connectionModel) {
+        databaseSystemEnum = connectionModel.getDatabaseSystemEnum();
+        maintenanceDb = connectionModel.getMaintenanceDb();
+        name = connectionModel.getName();
+        host = connectionModel.getHost();
+        port = connectionModel.getPort();
+        username = connectionModel.getUsername();
+        password = connectionModel.getPassword();
+        return build();
     }
 }
