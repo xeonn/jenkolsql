@@ -61,11 +61,13 @@ public class BrowserController extends FxmlStage {
     @FXML
     private Button buttonRefresh;
     @FXML
-    private TreeView<BrowserItem> treeView;
-    @FXML
     private Button buttonSqlEditor;
     @FXML
+    private Button buttonTable;
+    @FXML
     private StackPane leftStackPane;
+    @FXML
+    private TreeView<BrowserItem> treeView;
 
     /**
      * Initializes the controller class.
@@ -73,6 +75,7 @@ public class BrowserController extends FxmlStage {
     public void initialize() {
         // Connection not yet available here
         buttonSqlEditor.setDisable(true);
+        buttonTable.setDisable(true);
 
         /*
         Get Connection for Sql editor from selected tree item.
@@ -82,11 +85,15 @@ public class BrowserController extends FxmlStage {
             if (newV.intValue() > 0) {
                 if (treeView.getSelectionModel().getSelectedItem().getParent() == null) {
                     buttonSqlEditor.setDisable(true);
+                    // TODO : buttonTable enable/disable should happens at database table treeitem only
+                    buttonTable.setDisable(true);
                 } else {
                     buttonSqlEditor.setDisable(false);
+                    buttonTable.setDisable(false);
                 }
             } else {
                 buttonSqlEditor.setDisable(true);
+                buttonTable.setDisable(true);
             }
         });
 

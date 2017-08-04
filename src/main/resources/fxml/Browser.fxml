@@ -17,7 +17,7 @@
         <items>
           <Button fx:id="buttonRefresh" mnemonicParsing="false" onAction="#onActionButtonRefresh" text="Refresh" />
             <Button fx:id="buttonSqlEditor" mnemonicParsing="false" onAction="#onActionButtonSqlEditor" text="SQL" />
-            <Button mnemonicParsing="false" text="Table" />
+            <Button fx:id="buttonTable" mnemonicParsing="false" text="Table" />
         </items>
       </ToolBar>
       <Label text="Database Brower" />
