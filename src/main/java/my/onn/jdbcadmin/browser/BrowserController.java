@@ -90,6 +90,7 @@ public class BrowserController extends FxmlStage {
                 buttonSqlEditor.setDisable(true);
             }
         });
+
     }
 
     /**
@@ -243,7 +244,7 @@ public class BrowserController extends FxmlStage {
     }
 
     private void refreshTree() throws IOException {
-        Stage dialog = startProgressDialog();
+        //    Stage dialog = startProgressDialog();
 
         fetchModel().thenRun(() -> Platform.runLater(() -> {
             // Fill up TreeView children from model
@@ -252,10 +253,10 @@ public class BrowserController extends FxmlStage {
             treeView.setRoot(rootItem);
             addTreeItemRecursive(model, rootItem);
             treeView.refresh();
-            dialog.close();
+            //        dialog.close();
         }));
 
-        dialog.show();
+        //     dialog.show();
     }
 
     private void addTreeItemRecursive(BrowserItem browserItem, TreeItem<BrowserItem> treeItem) {

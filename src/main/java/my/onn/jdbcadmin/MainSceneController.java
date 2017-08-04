@@ -104,7 +104,6 @@ public class MainSceneController {
         btn.setOnAction(e -> {
             BrowserController browser = (BrowserController) fxmlControllerProducer.getFxmlDialog(FxmlUI.BROWSER);
             browser.initOwner(stage);
-            browser.initModality(Modality.NONE);
             browser.show();
             browser.setConnectionModel(connectionModel);
         });
