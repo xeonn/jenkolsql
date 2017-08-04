@@ -100,26 +100,7 @@ public class BrowserController extends FxmlStage {
     public void setConnectionModel(ConnectionModel model) {
         if (this.connectionModel == null) {
             this.connectionModel = model;
-            logger.info("Connecting to " + model.getHost());
-            try (Connection cnn = DriverManager.getConnection(model.getUrl(null), model.getUsername(), model.getPassword())) {
-                if (!cnn.isValid(2)) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Notification");
-                    alert.setContentText("Connection failed");
-                    alert.showAndWait();
-                } else {
-                    refreshTree();
-                }
-            } catch (SQLException ex) {
-                logger.log(Level.SEVERE, null, ex);
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setContentText(ex.getLocalizedMessage());
-                alert.showAndWait();
-                this.close();
-            } catch (IOException ex) {
-                Logger.getLogger(BrowserController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            onActionButtonRefresh(null);
         } else {
             logger.warning(String.format("Connection exist [%s]. Ignoring new connection set %s",
                     this.connectionModel.getUrl(null), model.getUrl(null)));
@@ -237,7 +218,8 @@ public class BrowserController extends FxmlStage {
         });
     }
 
-    private void refreshTree() throws IOException {
+    private void refreshTree() {
+        buttonRefresh.setDisable(true);
         VBox vbox = startTreeViewProgressIndicator();
 
         fetchModel().thenRun(() -> Platform.runLater(() -> {
@@ -248,6 +230,7 @@ public class BrowserController extends FxmlStage {
             addTreeItemRecursive(model, rootItem);
             treeView.refresh();
             leftStackPane.getChildren().remove(vbox);
+            buttonRefresh.setDisable(false);
         }));
 
     }
@@ -304,6 +287,34 @@ public class BrowserController extends FxmlStage {
         wnd.setConnectionUrl(connectionModel.getUrl(database), connectionModel.getUsername(), connectionModel.getPassword());
         // wnd.initOwner(this); -- this line is required but currently it disabled resizing and maximizing
         wnd.show();
+    }
+
+    @FXML
+    private void onActionButtonRefresh(ActionEvent event) {
+        // TODO : Refresh action should refresh portion of tree item. For now, we refresh all.
+
+        treeView.setRoot(null);
+
+        try (Connection cnn = DriverManager.getConnection(
+                connectionModel.getUrl(null),
+                connectionModel.getUsername(),
+                connectionModel.getPassword())) {
+            if (!cnn.isValid(2)) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Notification");
+                alert.setContentText("Connection failed");
+                alert.showAndWait();
+            } else {
+                refreshTree();
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, null, ex);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setContentText(ex.getLocalizedMessage());
+            alert.showAndWait();
+            this.close();
+        }
     }
 
 }

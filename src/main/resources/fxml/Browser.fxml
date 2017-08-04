@@ -15,7 +15,7 @@
    <children>
       <ToolBar prefHeight="40.0" prefWidth="200.0">
         <items>
-          <Button fx:id="buttonRefresh" mnemonicParsing="false" text="Refresh" />
+          <Button fx:id="buttonRefresh" mnemonicParsing="false" onAction="#onActionButtonRefresh" text="Refresh" />
             <Button fx:id="buttonSqlEditor" mnemonicParsing="false" onAction="#onActionButtonSqlEditor" text="SQL" />
             <Button mnemonicParsing="false" text="Table" />
         </items>
