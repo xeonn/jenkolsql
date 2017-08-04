@@ -19,18 +19,15 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.browser.sqleditor.SqlEditorWindow;
 import my.onn.jdbcadmin.connection.ConnectionModel;
@@ -64,9 +61,13 @@ public class BrowserController extends FxmlStage {
     @FXML
     private Button buttonRefresh;
     @FXML
-    private TreeView<BrowserItem> treeView;
-    @FXML
     private Button buttonSqlEditor;
+    @FXML
+    private Button buttonTable;
+    @FXML
+    private StackPane leftStackPane;
+    @FXML
+    private TreeView<BrowserItem> treeView;
 
     /**
      * Initializes the controller class.
@@ -74,6 +75,7 @@ public class BrowserController extends FxmlStage {
     public void initialize() {
         // Connection not yet available here
         buttonSqlEditor.setDisable(true);
+        buttonTable.setDisable(true);
 
         /*
         Get Connection for Sql editor from selected tree item.
@@ -83,11 +85,15 @@ public class BrowserController extends FxmlStage {
             if (newV.intValue() > 0) {
                 if (treeView.getSelectionModel().getSelectedItem().getParent() == null) {
                     buttonSqlEditor.setDisable(true);
+                    // TODO : buttonTable enable/disable should happens at database table treeitem only
+                    buttonTable.setDisable(true);
                 } else {
                     buttonSqlEditor.setDisable(false);
+                    buttonTable.setDisable(false);
                 }
             } else {
                 buttonSqlEditor.setDisable(true);
+                buttonTable.setDisable(true);
             }
         });
 
@@ -101,49 +107,25 @@ public class BrowserController extends FxmlStage {
     public void setConnectionModel(ConnectionModel model) {
         if (this.connectionModel == null) {
             this.connectionModel = model;
-            logger.info("Connecting to " + model.getHost());
-            try (Connection cnn = DriverManager.getConnection(model.getUrl(null), model.getUsername(), model.getPassword())) {
-                if (!cnn.isValid(2)) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Notification");
-                    alert.setContentText("Connection failed");
-                    alert.showAndWait();
-                } else {
-                    refreshTree();
-                }
-            } catch (SQLException ex) {
-                logger.log(Level.SEVERE, null, ex);
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setContentText(ex.getLocalizedMessage());
-                alert.showAndWait();
-                this.close();
-            } catch (IOException ex) {
-                Logger.getLogger(BrowserController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            onActionButtonRefresh(null);
         } else {
             logger.warning(String.format("Connection exist [%s]. Ignoring new connection set %s",
                     this.connectionModel.getUrl(null), model.getUrl(null)));
         }
     }
 
-    private Stage startProgressDialog() {
-        ProgressBar pb = new ProgressBar();
-        Label label = new Label("Connecting to database, please wait ...");
-        VBox vbox = new VBox(pb, label);
-        Scene scene = new Scene(vbox);
-        Stage dialog = new Stage(StageStyle.UNDECORATED);
+    private VBox startTreeViewProgressIndicator() {
+        ProgressIndicator pi = new ProgressIndicator();
+        Label label = new Label("Connecting to database ...");
+        VBox vbox = new VBox(pi, label);
 
-        vbox.setAlignment(Pos.CENTER);
+        vbox.setAlignment(Pos.TOP_CENTER);
         vbox.setPadding(new Insets(10.0));
         vbox.setSpacing(10.0);
 
-        dialog.initOwner(this);
-        dialog.initModality(Modality.WINDOW_MODAL);
-        dialog.centerOnScreen();
-        dialog.setAlwaysOnTop(true);
-        dialog.setScene(scene);
-        return dialog;
+        leftStackPane.getChildren().add(vbox);
+
+        return vbox;
     }
 
     private CompletableFuture fetchModel() {
@@ -243,8 +225,9 @@ public class BrowserController extends FxmlStage {
         });
     }
 
-    private void refreshTree() throws IOException {
-        //    Stage dialog = startProgressDialog();
+    private void refreshTree() {
+        buttonRefresh.setDisable(true);
+        VBox vbox = startTreeViewProgressIndicator();
 
         fetchModel().thenRun(() -> Platform.runLater(() -> {
             // Fill up TreeView children from model
@@ -253,10 +236,10 @@ public class BrowserController extends FxmlStage {
             treeView.setRoot(rootItem);
             addTreeItemRecursive(model, rootItem);
             treeView.refresh();
-            //        dialog.close();
+            leftStackPane.getChildren().remove(vbox);
+            buttonRefresh.setDisable(false);
         }));
 
-        //     dialog.show();
     }
 
     private void addTreeItemRecursive(BrowserItem browserItem, TreeItem<BrowserItem> treeItem) {
@@ -311,6 +294,34 @@ public class BrowserController extends FxmlStage {
         wnd.setConnectionUrl(connectionModel.getUrl(database), connectionModel.getUsername(), connectionModel.getPassword());
         // wnd.initOwner(this); -- this line is required but currently it disabled resizing and maximizing
         wnd.show();
+    }
+
+    @FXML
+    private void onActionButtonRefresh(ActionEvent event) {
+        // TODO : Refresh action should refresh portion of tree item. For now, we refresh all.
+
+        treeView.setRoot(null);
+
+        try (Connection cnn = DriverManager.getConnection(
+                connectionModel.getUrl(null),
+                connectionModel.getUsername(),
+                connectionModel.getPassword())) {
+            if (!cnn.isValid(2)) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Notification");
+                alert.setContentText("Connection failed");
+                alert.showAndWait();
+            } else {
+                refreshTree();
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE, null, ex);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setContentText(ex.getLocalizedMessage());
+            alert.showAndWait();
+            this.close();
+        }
     }
 
 }
