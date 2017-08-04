@@ -19,18 +19,15 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.browser.sqleditor.SqlEditorWindow;
 import my.onn.jdbcadmin.connection.ConnectionModel;
@@ -67,6 +64,8 @@ public class BrowserController extends FxmlStage {
     private TreeView<BrowserItem> treeView;
     @FXML
     private Button buttonSqlEditor;
+    @FXML
+    private StackPane leftStackPane;
 
     /**
      * Initializes the controller class.
@@ -127,23 +126,18 @@ public class BrowserController extends FxmlStage {
         }
     }
 
-    private Stage startProgressDialog() {
-        ProgressBar pb = new ProgressBar();
-        Label label = new Label("Connecting to database, please wait ...");
-        VBox vbox = new VBox(pb, label);
-        Scene scene = new Scene(vbox);
-        Stage dialog = new Stage(StageStyle.UNDECORATED);
+    private VBox startTreeViewProgressIndicator() {
+        ProgressIndicator pi = new ProgressIndicator();
+        Label label = new Label("Connecting to database ...");
+        VBox vbox = new VBox(pi, label);
 
-        vbox.setAlignment(Pos.CENTER);
+        vbox.setAlignment(Pos.TOP_CENTER);
         vbox.setPadding(new Insets(10.0));
         vbox.setSpacing(10.0);
 
-        dialog.initOwner(this);
-        dialog.initModality(Modality.WINDOW_MODAL);
-        dialog.centerOnScreen();
-        dialog.setAlwaysOnTop(true);
-        dialog.setScene(scene);
-        return dialog;
+        leftStackPane.getChildren().add(vbox);
+
+        return vbox;
     }
 
     private CompletableFuture fetchModel() {
@@ -244,7 +238,7 @@ public class BrowserController extends FxmlStage {
     }
 
     private void refreshTree() throws IOException {
-        //    Stage dialog = startProgressDialog();
+        VBox vbox = startTreeViewProgressIndicator();
 
         fetchModel().thenRun(() -> Platform.runLater(() -> {
             // Fill up TreeView children from model
@@ -253,10 +247,9 @@ public class BrowserController extends FxmlStage {
             treeView.setRoot(rootItem);
             addTreeItemRecursive(model, rootItem);
             treeView.refresh();
-            //        dialog.close();
+            leftStackPane.getChildren().remove(vbox);
         }));
 
-        //     dialog.show();
     }
 
     private void addTreeItemRecursive(BrowserItem browserItem, TreeItem<BrowserItem> treeItem) {
