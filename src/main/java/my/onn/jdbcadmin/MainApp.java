@@ -1,7 +1,9 @@
 package my.onn.jdbcadmin;
 
+import com.sun.javafx.application.LauncherImpl;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.application.Preloader;
 import javafx.stage.Stage;
 import org.jboss.weld.environment.se.Weld;
 
@@ -21,7 +23,6 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-
         weld.initialize().select(MainSceneController.class).get().start(stage);
     }
 
@@ -34,7 +35,7 @@ public class MainApp extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        launch(args);
+        LauncherImpl.launchApplication(MainApp.class, SplashScreenLoader.class, args);
     }
 
 }
