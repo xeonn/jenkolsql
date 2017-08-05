@@ -37,8 +37,8 @@
      * first color in -fx-background-color for the "focused" pseudo-class. Also
      * typically used with insets of -1.4 to provide a glowing effect.
      */
-	-fx-focus-color: -swatch-400;
-	-fx-faint-focus-color: -swatch-200;
+/*	-fx-focus-color: -swatch-400;
+	-fx-faint-focus-color: -swatch-200;*/
 	/* A bright blue for highlighting/accenting objects.  For example: selected
      * text; selected items in menus, lists, trees, and tables; progress bars */
 	-fx-accent: -swatch-400;
