@@ -42,7 +42,10 @@ public final class FxmlControllerProducer {
             });
 
             dialog.setTitle(resources.getString(fxmlUi.getTitle()));
-            dialog.setScene(new Scene((Parent) loader.load()));
+
+            Scene scene = new Scene((Parent) loader.load());
+            scene.getStylesheets().add("/styles/Styles.css");
+            dialog.setScene(scene);
             return dialog;
         } catch (IOException ex) {
             Logger.getLogger(FxmlControllerProducer.class.getName()).log(Level.SEVERE, null, ex);
