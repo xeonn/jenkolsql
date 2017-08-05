@@ -16,7 +16,7 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                <children>
-                  <TextArea fx:id="textAreaSql" prefHeight="265.0" prefWidth="958.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <TextArea fx:id="textAreaSql" onKeyReleased="#onTextAreaSqlKeyReleased" prefHeight="265.0" prefWidth="958.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0">
@@ -37,7 +37,7 @@
         <buttons>
             <Button mnemonicParsing="false" onAction="#onActionOpenFile" text="Open file ..." />
           <Button mnemonicParsing="false" onAction="#onActionSave" text="Save" />
-            <Button mnemonicParsing="false" onAction="#onButtonRun" text="Run" />
+            <Button mnemonicParsing="false" onAction="#onButtonRun" text="Run (F5)" />
         </buttons>
          <BorderPane.margin>
             <Insets left="10.0" right="10.0" />

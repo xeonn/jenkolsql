@@ -31,6 +31,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javax.inject.Inject;
@@ -212,11 +214,10 @@ public class SqlEditorWindow extends FxmlStage {
         this.password = password;
     }
 
-    private ResultSet executeSql(String sql) throws SQLException {
-        try (Connection cnn = DriverManager.getConnection(this.connectionUrl, this.username, this.password);
-                Statement stmt = cnn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                ResultSet result = stmt.executeQuery(sql)) {
-            return result;
+    @FXML
+    private void onTextAreaSqlKeyReleased(KeyEvent event) {
+        if (event.getCode() == KeyCode.F5) {
+            onButtonRun(null);
         }
     }
 }
