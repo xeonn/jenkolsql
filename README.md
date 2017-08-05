@@ -14,7 +14,7 @@ This is very much pre-alpha and currently only supporting *Postgresql*. Immediat
 * Netbeans
 
 # TODO List for v1.0
-* Splash screen
+* ~~Splash screen~~
 * ~~Fix Database Browser not able to resize.~~
 * Syntax highlighting for Sql editor.
 * Hide trails of Mysql and Oracle (such as the drop down selection) because they are not enabled yet.
