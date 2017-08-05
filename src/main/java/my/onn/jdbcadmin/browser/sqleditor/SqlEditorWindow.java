@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -53,13 +54,16 @@ public class SqlEditorWindow extends FxmlStage {
     private String openedFile;
     private String stageTitle;
 
+    List<ArrayList<String>> tableViewModel = new ArrayList<>();
+    List<String> tableViewColumn = new ArrayList<>();
+
     @Inject
     MainResource resources;
 
     @FXML
     private TextArea textAreaSql;
     @FXML
-    private TableView<ArrayList<String>> tableViewResult;
+    private TableView<ArrayList<String>> tableView;
 
     /**
      * Initializes the controller class.
@@ -75,6 +79,58 @@ public class SqlEditorWindow extends FxmlStage {
             Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+    }
+
+    private void executeSql(String sql) {
+        tableViewColumn.clear();
+        tableViewModel.clear();
+        int columnCount = -1;
+
+        try (Connection cnn = DriverManager.getConnection(this.connectionUrl, this.username, this.password);
+                Statement stmt = cnn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                ResultSet result = stmt.executeQuery(sql)) {
+
+            ResultSetMetaData rsm = result.getMetaData();
+            columnCount = rsm.getColumnCount();
+
+            for (int n = 0; n < columnCount; n++) {
+                tableViewColumn.add(rsm.getColumnLabel(n + 1));
+            }
+
+            //TODO: Buffer all record using some format, xml or json as mapped memory file
+            int count = 0;
+            while (result.next() && count < 100) {
+                ArrayList<String> rows = new ArrayList<>();
+
+                for (int n = 0; n < columnCount; n++) {
+                    rows.add(result.getString(n + 1));
+                }
+                tableViewModel.add(rows);
+                count++;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        updateTableView();
+    }
+
+    private void updateTableView() {
+        tableView.getItems().clear();
+        tableView.getColumns().clear();
+
+        IntStream.range(0, tableViewColumn.size())
+                .forEach(idx -> {
+                    TableColumn<ArrayList<String>, String> col = new TableColumn<>(tableViewColumn.get(idx));
+                    //int i = n;
+                    col.setCellValueFactory(c -> {
+                        return new SimpleStringProperty(c.getValue().get(idx));
+                    });
+                    tableView.getColumns().add(col);
+                });
+
+        tableViewModel.stream().forEach(row
+                -> tableView.getItems().add(row));
     }
 
     @FXML
@@ -93,46 +149,7 @@ public class SqlEditorWindow extends FxmlStage {
             return;
         }
 
-        tableViewResult.getItems().clear();
-        tableViewResult.getColumns().clear();
-        int columnCount = -1;
-
-        //TODO: Refactor to use model instead of directly to ui element (tableViewResult)
-        try (Connection cnn = DriverManager.getConnection(this.connectionUrl, this.username, this.password);
-                Statement stmt = cnn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                ResultSet result = stmt.executeQuery(strSql)) {
-
-            ResultSetMetaData rsm = result.getMetaData();
-            columnCount = rsm.getColumnCount();
-
-            // Create data model, an array of array limited to 100 records for now
-            List<ArrayList<String>> model = new ArrayList<>();
-
-            for (int n = 0; n < columnCount; n++) {
-                TableColumn<ArrayList<String>, String> col = new TableColumn<>(rsm.getColumnLabel(n + 1));
-                int i = n;
-                col.setCellValueFactory(c -> {
-                    return new SimpleStringProperty(c.getValue().get(i));
-                });
-                tableViewResult.getColumns().add(col);
-            }
-            //TODO: Buffer all record using some format, xml or json as mapped memory file
-            int count = 0;
-            while (result.next() && count < 100) {
-                ArrayList<String> cols = new ArrayList<>();
-
-                for (int n = 0; n < columnCount; n++) {
-                    cols.add(result.getString(n + 1));
-                }
-                tableViewResult.getItems().add(cols);
-                count++;
-            }
-
-        } catch (SQLException ex) {
-            Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        tableViewResult.refresh();
+        executeSql(strSql);
     }
 
     @FXML
