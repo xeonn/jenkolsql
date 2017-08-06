@@ -3,7 +3,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -21,7 +24,24 @@
             </AnchorPane>
             <StackPane fx:id="tableStackPane">
                <children>
-                  <TableView fx:id="tableView" prefHeight="265.0" prefWidth="958.0" />
+                  <TabPane fx:id="tabPane">
+                     <tabs>
+                        <Tab closable="false" text="Data Output">
+                           <content>
+                              <TableView fx:id="tableView" prefHeight="265.0" prefWidth="958.0" />
+                           </content>
+                        </Tab>
+                        <Tab text="Messages">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <Label fx:id="labelMessage" text="Empty Record" />
+                                 </children>
+                              </AnchorPane>
+                          </content>
+                        </Tab>
+                     </tabs>
+                  </TabPane>
                </children>
             </StackPane>
         </items>

@@ -33,7 +33,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -65,6 +67,8 @@ public class SqlEditorWindow extends FxmlStage {
 
     List<ArrayList<String>> tableViewModel = new ArrayList<>();
     List<String> tableViewColumn = new ArrayList<>();
+    private double connectiontime;
+    private double querytime;
 
     @Inject
     MainResource resources;
@@ -75,6 +79,10 @@ public class SqlEditorWindow extends FxmlStage {
     private TableView<ArrayList<String>> tableView;
     @FXML
     private StackPane tableStackPane;
+    @FXML
+    private TabPane tabPane;
+    @FXML
+    private Label labelMessage;
 
     /**
      * Initializes the controller class.
@@ -93,14 +101,19 @@ public class SqlEditorWindow extends FxmlStage {
     }
 
     private void executeSql(String sql) {
+        connectiontime = 0;
+        querytime = 0;
         tableViewColumn.clear();
         tableViewModel.clear();
         int columnCount = -1;
+        long start_time = System.nanoTime();
+        long end_connection_time = 0;
 
         try (Connection cnn = DriverManager.getConnection(this.connectionUrl, this.username, this.password);
-                Statement stmt = cnn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                ResultSet result = stmt.executeQuery(sql)) {
+                Statement stmt = cnn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+            end_connection_time = System.nanoTime();
 
+            ResultSet result = stmt.executeQuery(sql);
             ResultSetMetaData rsm = result.getMetaData();
             columnCount = rsm.getColumnCount();
 
@@ -126,7 +139,7 @@ public class SqlEditorWindow extends FxmlStage {
 
             //TODO: Buffer all record using some format, xml or json as mapped memory file
             int count = 0;
-            while (result.next() && count < 100) {
+            while (result.next() /*&& count < 100*/) {
                 ArrayList<String> rows = new ArrayList<>();
 
                 for (int n = 0; n < columnCount; n++) {
@@ -136,7 +149,15 @@ public class SqlEditorWindow extends FxmlStage {
                 count++;
             }
         } catch (SQLException ex) {
-            Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
+            Platform.runLater(() -> {
+                tabPane.getSelectionModel().select(1);
+                labelMessage.setText(ex.getLocalizedMessage());
+            });
+        } finally {
+            long end_query_time = System.nanoTime();
+            this.connectiontime = (end_connection_time - start_time) / 1e6;
+            this.querytime = (end_query_time - end_connection_time) / 1e6;
         }
     }
 
@@ -157,6 +178,11 @@ public class SqlEditorWindow extends FxmlStage {
 
         tableViewModel.stream().forEach(row
                 -> tableView.getItems().add(row));
+        if (tableViewModel.size() > 0) {
+            tabPane.getSelectionModel().select(0);
+        } else {
+            tabPane.getSelectionModel().select(1);
+        }
     }
 
     @FXML
@@ -187,6 +213,13 @@ public class SqlEditorWindow extends FxmlStage {
         }).thenRun(() -> {
             Platform.runLater(() -> {
                 tableStackPane.getChildren().remove(hbox);
+                if (tableViewModel.size() > 0) {
+                    labelMessage.setText(String.format(
+                            "Connection established: %.1f ms\n"
+                            + "Total query runtime: %.1f ms\n"
+                            + "%d rows retrieved.",
+                            connectiontime, querytime, tableViewModel.size()));
+                }
                 updateTableView();
             });
         });
