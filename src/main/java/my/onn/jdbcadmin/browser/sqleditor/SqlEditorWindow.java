@@ -23,17 +23,23 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javax.inject.Inject;
@@ -64,6 +70,8 @@ public class SqlEditorWindow extends FxmlStage {
     private TextArea textAreaSql;
     @FXML
     private TableView<ArrayList<String>> tableView;
+    @FXML
+    private StackPane tableStackPane;
 
     /**
      * Initializes the controller class.
@@ -111,8 +119,6 @@ public class SqlEditorWindow extends FxmlStage {
         } catch (SQLException ex) {
             Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        updateTableView();
     }
 
     private void updateTableView() {
@@ -149,7 +155,22 @@ public class SqlEditorWindow extends FxmlStage {
             return;
         }
 
-        executeSql(strSql);
+        //activate progress indicator
+        ProgressIndicator pi = new ProgressIndicator();
+        HBox hbox = new HBox(pi);
+        hbox.setAlignment(Pos.CENTER);
+        tableStackPane.getChildren().add(hbox);
+
+        String sql = strSql;
+        CompletableFuture.runAsync(() -> {
+            executeSql(sql);
+        }).thenRun(() -> {
+            Platform.runLater(() -> {
+                tableStackPane.getChildren().remove(hbox);
+                updateTableView();
+            });
+        });
+
     }
 
     @FXML
