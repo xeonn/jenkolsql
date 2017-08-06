@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import static java.sql.Types.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -102,7 +103,23 @@ public class SqlEditorWindow extends FxmlStage {
             columnCount = rsm.getColumnCount();
 
             for (int n = 0; n < columnCount; n++) {
-                tableViewColumn.add(rsm.getColumnLabel(n + 1));
+                String typename = rsm.getColumnTypeName(n + 1);
+                switch (rsm.getColumnType(n + 1)) {
+                    case DECIMAL:
+                    case NUMERIC:
+                        typename = typename + String.format("(%d,%d)",
+                                rsm.getPrecision(n + 1),
+                                rsm.getScale(n + 1));
+                        break;
+                    case VARCHAR:
+                    case VARBINARY:
+                        typename = typename + String.format("(%s)", rsm.getPrecision(n + 1));
+                        break;
+                }
+                tableViewColumn.add(
+                        String.format("%s\n%s",
+                                rsm.getColumnLabel(n + 1),
+                                typename));
             }
 
             //TODO: Buffer all record using some format, xml or json as mapped memory file
@@ -132,6 +149,7 @@ public class SqlEditorWindow extends FxmlStage {
                     col.setCellValueFactory(c -> {
                         return new SimpleStringProperty(c.getValue().get(idx));
                     });
+                    col.setPrefWidth(120);
                     tableView.getColumns().add(col);
                 });
 
