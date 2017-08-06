@@ -54,6 +54,8 @@ import my.onn.jdbcadmin.ui.util.FxmlStage;
  */
 public class SqlEditorWindow extends FxmlStage {
 
+    private static final Logger logger = Logger.getLogger(SqlEditorWindow.class.getName());
+
     private String connectionUrl;
     private String password;
     private String username;
@@ -85,7 +87,7 @@ public class SqlEditorWindow extends FxmlStage {
         try {
             is.close();
         } catch (IOException ex) {
-            Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         }
 
     }
@@ -222,9 +224,9 @@ public class SqlEditorWindow extends FxmlStage {
                     setTitle(stageTitle + " - [" + file.getName() + "]");
                 }
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
-                Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -250,9 +252,9 @@ public class SqlEditorWindow extends FxmlStage {
                 openedFile = file.getAbsolutePath();
                 setTitle(stageTitle + " - [" + file.getName() + "]");
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
-                Logger.getLogger(SqlEditorWindow.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             }
         }
     }
