@@ -21,7 +21,7 @@
         </items>
       </ToolBar>
       <Label text="Database Brower" />
-      <SplitPane dividerPositions="0.3298368298368298">
+      <SplitPane dividerPositions="0.3298368298368298" VBox.vgrow="ALWAYS">
          <items>
             <StackPane fx:id="leftStackPane">
                <children>
@@ -30,13 +30,13 @@
             </StackPane>
             <VBox>
                <children>
-                  <TableView prefHeight="200.0" prefWidth="200.0">
+                  <TableView prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                     <columns>
                       <TableColumn prefWidth="75.0" text="C1" />
                       <TableColumn prefWidth="75.0" text="C2" />
                     </columns>
                   </TableView>
-                  <TextArea prefHeight="200.0" prefWidth="200.0" />
+                  <TextArea prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
          </items>

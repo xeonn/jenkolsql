@@ -17,6 +17,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
@@ -103,7 +104,10 @@ public class MainSceneController {
         btn.setGraphic(new ImageView(connectionModel.getDatabaseSystemEnum().getImage()));
         btn.setOnAction(e -> {
             BrowserController browser = (BrowserController) fxmlControllerProducer.getFxmlDialog(FxmlUI.BROWSER);
-            browser.initOwner(stage);
+
+            // Due to unknown bug, calling initOwner disables maximize/minimize capability.
+            // Temporarily disable initOwner
+            //browser.initOwner(stage);
             browser.show();
             browser.setConnectionModel(connectionModel);
         });
