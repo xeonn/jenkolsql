@@ -12,7 +12,7 @@
    <top>
       <HBox spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <TextField fx:id="textFieldSearch" maxWidth="1.7976931348623157E308" prefWidth="500.0" promptText="Search..." HBox.hgrow="ALWAYS" />
+            <TextField fx:id="textFieldSearch" maxWidth="1.7976931348623157E308" onKeyReleased="#onSearchKeyReleased" prefWidth="500.0" promptText="Search..." HBox.hgrow="ALWAYS" />
           <Button id="main-scene-button" fx:id="buttonAdd" maxWidth="-Infinity" minWidth="100.0" mnemonicParsing="false" onAction="#onActionButtonAdd" prefWidth="100.0" text="%main.button.add" />
          </children>
          <padding>

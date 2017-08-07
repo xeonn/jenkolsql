@@ -3,6 +3,7 @@ package my.onn.jdbcadmin;
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
@@ -15,10 +16,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.TilePane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
@@ -28,6 +28,8 @@ import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlUI;
 
 public class MainSceneController {
+
+    private static final Logger logger = Logger.getLogger(MainSceneController.class.getName());
 
     Set<Button> connections = new TreeSet();
     private ObservableSet<ConnectionModel> connectionModels;
@@ -114,8 +116,10 @@ public class MainSceneController {
     }
 
     private void createNewButton(ConnectionModel connectionModel) {
-        Button btn = new Button(connectionModel.getName() + "\n"
-                + connectionModel.getHost());
+        Button btn = new Button(String.format("%s\n%s-[%s]",
+                connectionModel.getName(),
+                connectionModel.getMaintenanceDb(),
+                connectionModel.getHost()));
         btn.setId(connectionModel.getMaintenanceDb());
 
         btn.setGraphic(new ImageView(connectionModel.getDatabaseSystemEnum().getImage()));
@@ -180,5 +184,32 @@ public class MainSceneController {
         return connectionModels.stream()
                 .filter(c -> c.getMaintenanceDb().equals(btn.getId()))
                 .findFirst().orElse(null);
+    }
+
+    @FXML
+    private void onSearchKeyReleased(KeyEvent event) {
+        String text = textFieldSearch.getText();
+
+        if (!text.isEmpty()) {
+            tilePane.getChildren().stream()
+                    .filter(a -> { // filter button only
+                        if (a instanceof Button) {
+                            a.setDisable(false);
+                            ConnectionModel cm = getConnectionModelFromButton((Button) a);
+                            String toSearch = cm.getName() + " " + cm.getMaintenanceDb();
+                            if (!toSearch.toLowerCase().contains(text.toLowerCase())) {
+                                logger.info("CM : " + cm.getMaintenanceDb() + " DOES NOT contain :" + text);
+                                return true;
+                            }
+                        }
+                        return false;
+                    }).forEach(b -> {
+                logger.warning("Disabling " + getConnectionModelFromButton((Button) b).getMaintenanceDb());
+                b.setDisable(true);
+            });
+        } else {
+            tilePane.getChildren().forEach(c -> c.setDisable(false));
+        }
+
     }
 }
