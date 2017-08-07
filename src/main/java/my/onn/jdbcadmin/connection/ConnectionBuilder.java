@@ -21,6 +21,7 @@ public class ConnectionBuilder {
     private int port;
     private String username;
     private String password;
+    private boolean emptyPassword;
 
     public ConnectionBuilder setDatabaseSystemEnum(DatabaseSystemEnum databaseSystem) {
         this.databaseSystemEnum = databaseSystem;
@@ -57,6 +58,11 @@ public class ConnectionBuilder {
         return this;
     }
 
+    public ConnectionBuilder setEmptyPassword(boolean notEmpty) {
+        this.emptyPassword = notEmpty;
+        return this;
+    }
+
     public ConnectionModel build() {
         return new ConnectionModel(
                 databaseSystemEnum,
@@ -65,7 +71,8 @@ public class ConnectionBuilder {
                 host,
                 port,
                 username,
-                password
+                password,
+                emptyPassword
         );
     }
 
@@ -77,6 +84,7 @@ public class ConnectionBuilder {
         port = connectionModel.getPort();
         username = connectionModel.getUsername();
         password = connectionModel.getPassword();
+        emptyPassword = connectionModel.isEmptyPassword();
         return build();
     }
 }

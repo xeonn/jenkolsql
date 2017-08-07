@@ -193,7 +193,7 @@ public class BrowserController extends FxmlStage {
 
                 // Database
                 PreparedStatement stmt = cnn.prepareStatement(
-                        "SELECT datname FROM pg_database WHERE datistemplate=false;",
+                        connectionModel.getDatabaseSystemEnum().getCatalogSql(),
                         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
                 ResultSet rsdatabase = stmt.executeQuery();
@@ -209,16 +209,29 @@ public class BrowserController extends FxmlStage {
                     try (Connection cnnDb = DriverManager.getConnection(connectionModel.getUrl(catalog),
                             connectionModel.getUsername(), connectionModel.getPassword())) {
 
+                        boolean haveNext = true;
                         ResultSet schemas = cnnDb.getMetaData().getSchemas(catalog, null);
-                        while (schemas.next()) {
-                            String schema = schemas.getString(1);
+                        while (haveNext) {
+                            haveNext = schemas.next();
+                            String schema;
+
+                            // if the db does not support schema, only populate for the said database
+                            if (!haveNext) {
+                                if (!catalog.equals(connectionModel.getMaintenanceDb())) {
+                                    break;
+                                } else {
+                                    schema = catalog;
+                                }
+                            } else {
+                                schema = schemas.getString(1);
+                            }
                             BrowserItem si = new BrowserItem(schema, "Schema", IconsEnum.SCHEMA);
 
                             /* Add TABLE to schema */
                             BrowserItem ti = new BrowserItem("Tables", "Tables", IconsEnum.NOTIFICATION);
 
                             String[] ttype = {"SYSTEM TABLE", "TABLE"};
-                            ResultSet tables = cnnDb.getMetaData().getTables(catalog, schema, null, ttype);
+                            ResultSet tables = cnnDb.getMetaData().getTables(catalog, schema, "%", ttype);
                             while (tables.next()) {
 
                                 String table = tables.getString(3);
@@ -229,14 +242,14 @@ public class BrowserController extends FxmlStage {
                                         IconsEnum.TABLEGRID);
 
                                 //Columns
-                                ResultSet columns = cnnDb.getMetaData().getColumns(null, null, table, null);
+                                ResultSet columns = cnnDb.getMetaData().getColumns(null, null, table, "%");
                                 while (columns.next()) {
 
                                     BrowserItem ci = new BrowserItem(String.format("%s [%s(%s)]",
                                             columns.getString(4), columns.getString(6), columns.getString(7)),
                                             String.format("%s\n%s(%s)\nNullable : %s",
                                                     columns.getString(4), columns.getString(6), columns.getString(7),
-                                                    Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
+                                                    columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
                                             IconsEnum.COLUMN);
 
                                     tti.getChildren().add(ci); // Add column to tables
@@ -252,7 +265,7 @@ public class BrowserController extends FxmlStage {
                             /* Add VIEW to schema */
                             BrowserItem vi = new BrowserItem("Views", "Views", IconsEnum.SCREEN);
                             String[] vtype = {"VIEW"};
-                            ResultSet views = cnnDb.getMetaData().getTables(catalog, schema, null, vtype);
+                            ResultSet views = cnnDb.getMetaData().getTables(catalog, schema, "%", vtype);
                             while (views.next()) {
                                 String view = views.getString(3);
                                 BrowserItem vvi = new BrowserItem(view,
@@ -262,14 +275,14 @@ public class BrowserController extends FxmlStage {
                                         IconsEnum.OPENBOOK);
 
                                 //Columns
-                                ResultSet columns = cnnDb.getMetaData().getColumns(null, null, view, null);
+                                ResultSet columns = cnnDb.getMetaData().getColumns(null, null, view, "%");
                                 while (columns.next()) {
 
                                     BrowserItem ci = new BrowserItem(String.format("%s [%s(%s)]",
                                             columns.getString(4), columns.getString(6), columns.getString(7)),
                                             String.format("%s\n%s(%s)\nNullable : %s",
                                                     columns.getString(4), columns.getString(6), columns.getString(7),
-                                                    Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
+                                                    columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
                                             IconsEnum.COLUMN);
                                     vvi.getChildren().add(ci); // Add column to tables
                                 }
@@ -283,14 +296,21 @@ public class BrowserController extends FxmlStage {
                             {
                                 db.getChildren().add(si);
                             }
-                        }
+
+                            haveNext = schemas.isAfterLast();
+                        } //Schema
                     }
-                    model.getChildren().add(db);
+                    if (!db.getChildren().isEmpty()) {
+                        model.getChildren().add(db);
+                    }
                 }
 
             } catch (SQLException ex) {
-                Logger.getLogger(BrowserController.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             }
+        }).exceptionally(e -> {
+            logger.log(Level.SEVERE, e.getLocalizedMessage());
+            return null;
         });
     }
 
@@ -372,6 +392,11 @@ public class BrowserController extends FxmlStage {
 
         treeView.setRoot(null);
 
+        try {
+            Class.forName(connectionModel.getDatabaseSystemEnum().getDriverClass());
+        } catch (ClassNotFoundException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
         try (Connection cnn = DriverManager.getConnection(
                 connectionModel.getUrl(null),
                 connectionModel.getUsername(),

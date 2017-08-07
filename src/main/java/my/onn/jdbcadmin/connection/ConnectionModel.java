@@ -5,12 +5,7 @@
  */
 package my.onn.jdbcadmin.connection;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import static my.onn.jdbcadmin.connection.DatabaseSystemEnum.*;
 
 /**
  * Immutable class to represent database connection information
@@ -26,8 +21,9 @@ public final class ConnectionModel {
     private final int port;
     private final String username;
     private final String password;
+    private final boolean emptyPassword;
 
-    public ConnectionModel(DatabaseSystemEnum databaseSystem, String maintenanceDb, String name, String host, int port, String username, String password) {
+    public ConnectionModel(DatabaseSystemEnum databaseSystem, String maintenanceDb, String name, String host, int port, String username, String password, boolean emptyPassword) {
         this.databaseSystem = databaseSystem;
         this.maintenanceDb = maintenanceDb;
         this.name = name;
@@ -35,6 +31,7 @@ public final class ConnectionModel {
         this.port = port;
         this.username = username;
         this.password = password;
+        this.emptyPassword = emptyPassword;
     }
 
     public DatabaseSystemEnum getDatabaseSystemEnum() {
@@ -75,6 +72,11 @@ public final class ConnectionModel {
      */
     public String getUrl(String database) {
         if (database == null) {
+            if (getDatabaseSystemEnum() == MYSQL) {
+                return String.format("%s://%s:%d/%s",
+                        getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
+                        getMaintenanceDb());
+            }
             return getMaintenanceUrl();
         } else {
             return String.format("%s://%s:%d/%s",
@@ -86,6 +88,10 @@ public final class ConnectionModel {
     public String getMaintenanceUrl() {
         return String.format("%s://%s:%d/?",
                 getDatabaseSystemEnum().getProtocol(), getHost(), getPort());
+    }
+
+    public boolean isEmptyPassword() {
+        return emptyPassword;
     }
 
 }

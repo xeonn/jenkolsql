@@ -13,9 +13,9 @@ import javafx.scene.image.Image;
  */
 public enum DatabaseSystemEnum {
     MYSQL {
-        
+
         private final String PROTOCOL = "jdbc:mysql";
-        
+
         @Override
         public String getMaintenanceDbPrompt() {
             return "root";
@@ -46,10 +46,20 @@ public enum DatabaseSystemEnum {
             return PROTOCOL;
         }
 
+        @Override
+        public String getDriverClass() {
+            return "com.mysql.jdbc.Driver";
+        }
+
+        @Override
+        public String getCatalogSql() {
+            return "SELECT schema_name FROM information_schema.schemata";
+        }
+
     },
     ORACLE {
         private final String PROTOCOL = "jdbc:oracle";
-        
+
         @Override
         public String getMaintenanceDbPrompt() {
             return "sys";
@@ -79,10 +89,20 @@ public enum DatabaseSystemEnum {
         public String getProtocol() {
             return PROTOCOL;
         }
+
+        @Override
+        public String getDriverClass() {
+            return "oracle.jdbc.OracleDriver";
+        }
+
+        @Override
+        public String getCatalogSql() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     },
     POSTGRES {
         private final String PROTOCOL = "jdbc:postgresql";
-        
+
         @Override
         public String getMaintenanceDbPrompt() {
             return "postgres";
@@ -112,6 +132,16 @@ public enum DatabaseSystemEnum {
         public String getProtocol() {
             return PROTOCOL;
         }
+
+        @Override
+        public String getDriverClass() {
+            return "org.postgresql.Driver";
+        }
+
+        @Override
+        public String getCatalogSql() {
+            return "SELECT datname FROM pg_database WHERE datistemplate=false;";
+        }
     };
 
     public abstract String getMaintenanceDbPrompt();
@@ -123,6 +153,10 @@ public enum DatabaseSystemEnum {
     public abstract String getUsernamePrompt();
 
     public abstract Image getImage();
-    
+
     public abstract String getProtocol();
+
+    public abstract String getDriverClass();
+
+    public abstract String getCatalogSql();
 }
