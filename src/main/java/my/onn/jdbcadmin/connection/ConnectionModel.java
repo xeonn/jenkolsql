@@ -26,8 +26,9 @@ public final class ConnectionModel {
     private final int port;
     private final String username;
     private final String password;
+    private final boolean emptyPassword;
 
-    public ConnectionModel(DatabaseSystemEnum databaseSystem, String maintenanceDb, String name, String host, int port, String username, String password) {
+    public ConnectionModel(DatabaseSystemEnum databaseSystem, String maintenanceDb, String name, String host, int port, String username, String password, boolean emptyPassword) {
         this.databaseSystem = databaseSystem;
         this.maintenanceDb = maintenanceDb;
         this.name = name;
@@ -35,6 +36,7 @@ public final class ConnectionModel {
         this.port = port;
         this.username = username;
         this.password = password;
+        this.emptyPassword = emptyPassword;
     }
 
     public DatabaseSystemEnum getDatabaseSystemEnum() {
@@ -86,6 +88,10 @@ public final class ConnectionModel {
     public String getMaintenanceUrl() {
         return String.format("%s://%s:%d/?",
                 getDatabaseSystemEnum().getProtocol(), getHost(), getPort());
+    }
+
+    public boolean isEmptyPassword() {
+        return emptyPassword;
     }
 
 }

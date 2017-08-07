@@ -15,7 +15,9 @@ import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,6 +25,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
@@ -76,6 +79,8 @@ public class ConnectionDialog extends FxmlStage {
     private BorderPane borderPane;
     @FXML
     private ChoiceBox<DatabaseSystemEnum> choiceBoxDbSystem;
+    @FXML
+    private CheckBox checkBoxEmptyPassword;
 
     public ConnectionDialog() throws IOException {
         this.connectionModel = new SimpleObjectProperty<>();
@@ -101,13 +106,21 @@ public class ConnectionDialog extends FxmlStage {
 
         // Enable Test and OK button once all information are available
         buttonOk.disableProperty().bind(
-                textFieldName.textProperty().isEmpty().or(
-                        textFieldPassword.textProperty().isEmpty())
+                textFieldName.textProperty().isEmpty().or((textFieldPassword.textProperty().isEmpty().and(
+                        checkBoxEmptyPassword.selectedProperty().not())))
         );
         buttonTestConnection.disableProperty().bind(
-                textFieldName.textProperty().isEmpty().or(
-                        textFieldPassword.textProperty().isEmpty())
+                textFieldName.textProperty().isEmpty().or((textFieldPassword.textProperty().isEmpty().and(
+                        checkBoxEmptyPassword.selectedProperty().not())))
         );
+        checkBoxEmptyPassword.selectedProperty().addListener((obj, oldV, newV) -> {
+            if (newV) {
+                textFieldPassword.setText("");
+                textFieldPassword.setDisable(true);
+            } else {
+                textFieldName.setDisable(false);
+            }
+        });
 
         choiceBoxDbSystem.getItems().setAll(DatabaseSystemEnum.values());
         choiceBoxDbSystem.getSelectionModel().selectedItemProperty().addListener(item -> {
