@@ -51,6 +51,11 @@ public enum DatabaseSystemEnum {
             return "com.mysql.jdbc.Driver";
         }
 
+        @Override
+        public String getCatalogSql() {
+            return "SELECT schema_name FROM information_schema.schemata";
+        }
+
     },
     ORACLE {
         private final String PROTOCOL = "jdbc:oracle";
@@ -88,6 +93,11 @@ public enum DatabaseSystemEnum {
         @Override
         public String getDriverClass() {
             return "oracle.jdbc.OracleDriver";
+        }
+
+        @Override
+        public String getCatalogSql() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     },
     POSTGRES {
@@ -127,6 +137,11 @@ public enum DatabaseSystemEnum {
         public String getDriverClass() {
             return "org.postgresql.Driver";
         }
+
+        @Override
+        public String getCatalogSql() {
+            return "SELECT datname FROM pg_database WHERE datistemplate=false;";
+        }
     };
 
     public abstract String getMaintenanceDbPrompt();
@@ -142,4 +157,6 @@ public enum DatabaseSystemEnum {
     public abstract String getProtocol();
 
     public abstract String getDriverClass();
+
+    public abstract String getCatalogSql();
 }
