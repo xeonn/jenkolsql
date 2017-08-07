@@ -38,16 +38,16 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
+import org.fxmisc.richtext.CodeArea;
 
 /**
  * FXML Controller class
@@ -73,8 +73,7 @@ public class SqlEditorWindow extends FxmlStage {
     @Inject
     MainResource resources;
 
-    @FXML
-    private TextArea textAreaSql;
+    private CodeArea textAreaSql;
     @FXML
     private TableView<ArrayList<String>> tableView;
     @FXML
@@ -83,21 +82,21 @@ public class SqlEditorWindow extends FxmlStage {
     private TabPane tabPane;
     @FXML
     private Label labelMessage;
+    @FXML
+    private AnchorPane anchorPaneTextEditor;
+
+    public SqlEditorWindow() {
+        textAreaSql = new CodeArea();
+    }
 
     /**
      * Initializes the controller class.
      */
     public void initialize() {
-        String fName = "/fonts/UbuntuMono-R.ttf";
-        InputStream is = SqlEditorWindow.class.getResourceAsStream(fName);
-        Font ubuntuFont = Font.loadFont(is, Font.getDefault().getSize() + 3);
-        textAreaSql.setFont(ubuntuFont);
-        try {
-            is.close();
-        } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
-        }
-
+        anchorPaneTextEditor.getChildren().add(textAreaSql);
+        textAreaSql.prefWidthProperty().bind(anchorPaneTextEditor.widthProperty());
+        textAreaSql.prefHeightProperty().bind(anchorPaneTextEditor.heightProperty());
+        textAreaSql.setOnKeyReleased(ev -> onTextAreaSqlKeyReleased(ev));
     }
 
     private void executeSql(String sql) {
@@ -191,7 +190,7 @@ public class SqlEditorWindow extends FxmlStage {
         Execute selected text or fallback to all.
          */
 
-        String strSql = textAreaSql.selectedTextProperty().get();
+        String strSql = textAreaSql.selectedTextProperty().getValue();
 
         if (strSql.isEmpty()) {
             strSql = textAreaSql.getText();
@@ -281,7 +280,7 @@ public class SqlEditorWindow extends FxmlStage {
                 while ((ch = isr.read()) > 0) {
                     sb.append((char) ch);
                 }
-                textAreaSql.setText(sb.toString());
+                textAreaSql.replaceText(sb.toString());
                 openedFile = file.getAbsolutePath();
                 setTitle(stageTitle + " - [" + file.getName() + "]");
             } catch (FileNotFoundException ex) {
@@ -305,7 +304,6 @@ public class SqlEditorWindow extends FxmlStage {
         this.password = password;
     }
 
-    @FXML
     private void onTextAreaSqlKeyReleased(KeyEvent event) {
         if (event.getCode() == KeyCode.F5) {
             onButtonRun(null);
