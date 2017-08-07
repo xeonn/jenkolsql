@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package my.onn.jdbcadmin.browser.sqleditor;
+package my.onn.jdbcadmin.sqleditor;
 
 import java.io.File;
 import java.io.FileInputStream;

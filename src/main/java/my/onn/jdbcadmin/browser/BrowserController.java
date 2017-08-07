@@ -29,7 +29,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javax.inject.Inject;
-import my.onn.jdbcadmin.browser.sqleditor.SqlEditorWindow;
+import my.onn.jdbcadmin.sqleditor.SqlEditorWindow;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
