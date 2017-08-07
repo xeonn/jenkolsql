@@ -26,6 +26,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javax.inject.Inject;
@@ -51,7 +52,7 @@ public class BrowserController extends FxmlStage {
      * Mostly modification of item will be done at the model object. The
      * treeViewResult component are refreshed with this model only.
      */
-    BrowserItem model = new BrowserItem("empty", IconsEnum.UNKNOWN);
+    BrowserItem model = new BrowserItem("empty", "No item selected", IconsEnum.UNKNOWN);
 
     ConnectionModel connectionModel;
 
@@ -68,6 +69,8 @@ public class BrowserController extends FxmlStage {
     private StackPane leftStackPane;
     @FXML
     private TreeView<BrowserItem> treeView;
+    @FXML
+    private VBox vboxProperty;
 
     /**
      * Initializes the controller class.
@@ -95,8 +98,56 @@ public class BrowserController extends FxmlStage {
                 buttonSqlEditor.setDisable(true);
                 buttonTable.setDisable(true);
             }
+
+            showProperty(newV);
         });
 
+    }
+
+    private void showProperty(Number treeItemIndex) {
+        vboxProperty.getChildren().clear();
+        logger.info(String.format("Index item %d selected", treeItemIndex));
+
+        if (treeItemIndex.intValue() > 0) {
+            BrowserItem val = treeView.getSelectionModel().getSelectedItem().getValue();
+
+            Label labelDesc = new Label("Description");
+            labelDesc.setMinWidth(100);
+            Label desc = new Label(val.getDescription());
+
+            HBox hbox = new HBox(labelDesc, desc);
+            vboxProperty.getChildren().add(hbox);
+        }
+
+        if (treeItemIndex.intValue() == 0) {
+            // show connection property
+            Label labelName = new Label("Name");
+            Label name = new Label(connectionModel.getName());
+            labelName.setMinWidth(80);
+            HBox row1 = new HBox(labelName, name);
+
+            Label labelHost = new Label("Host");
+            Label host = new Label(connectionModel.getHost());
+            labelHost.setMinWidth(80);
+            HBox row2 = new HBox(labelHost, host);
+
+            Label labelDatabase = new Label("Database");
+            Label database = new Label(connectionModel.getMaintenanceDb());
+            labelDatabase.setMinWidth(80);
+            HBox row3 = new HBox(labelDatabase, database);
+
+            Label labelUsername = new Label("User");
+            Label username = new Label(connectionModel.getUsername());
+            labelUsername.setMinWidth(80);
+            HBox row4 = new HBox(labelUsername, username);
+
+            Label labelUrl = new Label("Jdbc url");
+            Label url = new Label(connectionModel.getUrl(null));
+            labelUrl.setMinWidth(80);
+            HBox row5 = new HBox(labelUrl, url);
+
+            vboxProperty.getChildren().addAll(row1, row2, row3, row4, row5);
+        }
     }
 
     /**
@@ -137,6 +188,7 @@ public class BrowserController extends FxmlStage {
                                 connectionModel.getName(),
                                 connectionModel.getHost(),
                                 connectionModel.getPort()),
+                        "Server (root item)",
                         IconsEnum.SERVER);
 
                 // Database
@@ -149,7 +201,10 @@ public class BrowserController extends FxmlStage {
                 while (rsdatabase.next()) {
                     String catalog = rsdatabase.getString(1);
 
-                    BrowserItem db = new BrowserItem(catalog, IconsEnum.DATABASE);
+                    BrowserItem db = new BrowserItem(
+                            catalog,
+                            "Database",
+                            IconsEnum.DATABASE);
 
                     try (Connection cnnDb = DriverManager.getConnection(connectionModel.getUrl(catalog),
                             connectionModel.getUsername(), connectionModel.getPassword())) {
@@ -157,17 +212,21 @@ public class BrowserController extends FxmlStage {
                         ResultSet schemas = cnnDb.getMetaData().getSchemas(catalog, null);
                         while (schemas.next()) {
                             String schema = schemas.getString(1);
-                            BrowserItem si = new BrowserItem(schema, IconsEnum.SCHEMA);
+                            BrowserItem si = new BrowserItem(schema, "Schema", IconsEnum.SCHEMA);
 
                             /* Add TABLE to schema */
-                            BrowserItem ti = new BrowserItem("Tables", IconsEnum.NOTIFICATION);
+                            BrowserItem ti = new BrowserItem("Tables", "Tables", IconsEnum.NOTIFICATION);
 
                             String[] ttype = {"SYSTEM TABLE", "TABLE"};
                             ResultSet tables = cnnDb.getMetaData().getTables(catalog, schema, null, ttype);
                             while (tables.next()) {
 
                                 String table = tables.getString(3);
-                                BrowserItem tti = new BrowserItem(table, IconsEnum.TABLEGRID);
+                                BrowserItem tti = new BrowserItem(table,
+                                        String.format("%s\n%s",
+                                                tables.getString(2),
+                                                tables.getString(3)),
+                                        IconsEnum.TABLEGRID);
 
                                 //Columns
                                 ResultSet columns = cnnDb.getMetaData().getColumns(null, null, table, null);
@@ -175,6 +234,9 @@ public class BrowserController extends FxmlStage {
 
                                     BrowserItem ci = new BrowserItem(String.format("%s [%s(%s)]",
                                             columns.getString(4), columns.getString(6), columns.getString(7)),
+                                            String.format("%s\n%s(%s)\nNullable : %s",
+                                                    columns.getString(4), columns.getString(6), columns.getString(7),
+                                                    Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
                                             IconsEnum.COLUMN);
 
                                     tti.getChildren().add(ci); // Add column to tables
@@ -188,12 +250,16 @@ public class BrowserController extends FxmlStage {
                             }
 
                             /* Add VIEW to schema */
-                            BrowserItem vi = new BrowserItem("Views", IconsEnum.SCREEN);
+                            BrowserItem vi = new BrowserItem("Views", "Views", IconsEnum.SCREEN);
                             String[] vtype = {"VIEW"};
                             ResultSet views = cnnDb.getMetaData().getTables(catalog, schema, null, vtype);
                             while (views.next()) {
                                 String view = views.getString(3);
-                                BrowserItem vvi = new BrowserItem(view, IconsEnum.OPENBOOK);
+                                BrowserItem vvi = new BrowserItem(view,
+                                        String.format("%s\n%s",
+                                                views.getString(2),
+                                                views.getString(3)),
+                                        IconsEnum.OPENBOOK);
 
                                 //Columns
                                 ResultSet columns = cnnDb.getMetaData().getColumns(null, null, view, null);
@@ -201,6 +267,9 @@ public class BrowserController extends FxmlStage {
 
                                     BrowserItem ci = new BrowserItem(String.format("%s [%s(%s)]",
                                             columns.getString(4), columns.getString(6), columns.getString(7)),
+                                            String.format("%s\n%s(%s)\nNullable : %s",
+                                                    columns.getString(4), columns.getString(6), columns.getString(7),
+                                                    Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
                                             IconsEnum.COLUMN);
                                     vvi.getChildren().add(ci); // Add column to tables
                                 }
@@ -245,6 +314,7 @@ public class BrowserController extends FxmlStage {
     private void addTreeItemRecursive(BrowserItem browserItem, TreeItem<BrowserItem> treeItem) {
         for (BrowserItem sub : browserItem.getChildren()) {
             TreeItem<BrowserItem> subItem = new TreeItem<>(sub);
+            subItem.setValue(sub);
             subItem.setGraphic(new ImageView(sub.getIcon().getImage()));
             treeItem.getChildren().add(subItem);
 

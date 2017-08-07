@@ -19,10 +19,12 @@ public class BrowserItem {
     private final String label;
     private final IconsEnum icon;
     private final ObservableList<BrowserItem> children;
+    private final String description;
 
-    BrowserItem(String label, IconsEnum icon) {
+    BrowserItem(String label, String description, IconsEnum icon) {
         this.label = label;
         this.icon = icon;
+        this.description = description;
         this.children = FXCollections.observableArrayList();
     }
 
@@ -36,6 +38,10 @@ public class BrowserItem {
 
     public ObservableList<BrowserItem> getChildren() {
         return children;
+    }
+    
+    public String getDescription() {
+        return description;
     }
 
     @Override
