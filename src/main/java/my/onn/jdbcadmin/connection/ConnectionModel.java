@@ -5,12 +5,7 @@
  */
 package my.onn.jdbcadmin.connection;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import static my.onn.jdbcadmin.connection.DatabaseSystemEnum.*;
 
 /**
  * Immutable class to represent database connection information
@@ -77,6 +72,11 @@ public final class ConnectionModel {
      */
     public String getUrl(String database) {
         if (database == null) {
+            if (getDatabaseSystemEnum() == MYSQL) {
+                return String.format("%s://%s:%d/%s",
+                        getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
+                        getMaintenanceDb());
+            }
             return getMaintenanceUrl();
         } else {
             return String.format("%s://%s:%d/%s",
