@@ -75,6 +75,7 @@ public class ConnectionProperties {
         config.setProperty(serverGroup + "username", connectionModel.getUsername());
         config.setProperty(serverGroup + "password", connectionModel.getPassword());
         config.setProperty(serverGroup + "port", Integer.toString(connectionModel.getPort()));
+        config.setProperty(serverGroup + "empty_password", Boolean.toString(connectionModel.isEmptyPassword()));
 
         // TODO: Code to save configuration
 //        builder.save();
@@ -111,6 +112,7 @@ public class ConnectionProperties {
                     .setPassword(config.get(groupKey + ".password").toString())
                     .setPort(Integer.parseInt(config.get(groupKey + ".port").toString()))
                     .setUsername(config.get(groupKey + ".username").toString())
+                    .setEmptyPassword(Boolean.parseBoolean(config.get(groupKey + ".empty_password").toString()))
                     .build();
 
             connectionModels.add(cm);
