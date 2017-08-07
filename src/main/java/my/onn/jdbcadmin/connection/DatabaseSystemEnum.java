@@ -13,9 +13,9 @@ import javafx.scene.image.Image;
  */
 public enum DatabaseSystemEnum {
     MYSQL {
-        
+
         private final String PROTOCOL = "jdbc:mysql";
-        
+
         @Override
         public String getMaintenanceDbPrompt() {
             return "root";
@@ -46,10 +46,15 @@ public enum DatabaseSystemEnum {
             return PROTOCOL;
         }
 
+        @Override
+        public String getDriverClass() {
+            return "com.mysql.jdbc.Driver";
+        }
+
     },
     ORACLE {
         private final String PROTOCOL = "jdbc:oracle";
-        
+
         @Override
         public String getMaintenanceDbPrompt() {
             return "sys";
@@ -79,10 +84,15 @@ public enum DatabaseSystemEnum {
         public String getProtocol() {
             return PROTOCOL;
         }
+
+        @Override
+        public String getDriverClass() {
+            return "oracle.jdbc.OracleDriver";
+        }
     },
     POSTGRES {
         private final String PROTOCOL = "jdbc:postgresql";
-        
+
         @Override
         public String getMaintenanceDbPrompt() {
             return "postgres";
@@ -112,6 +122,11 @@ public enum DatabaseSystemEnum {
         public String getProtocol() {
             return PROTOCOL;
         }
+
+        @Override
+        public String getDriverClass() {
+            return "org.postgresql.Driver";
+        }
     };
 
     public abstract String getMaintenanceDbPrompt();
@@ -123,6 +138,8 @@ public enum DatabaseSystemEnum {
     public abstract String getUsernamePrompt();
 
     public abstract Image getImage();
-    
+
     public abstract String getProtocol();
+
+    public abstract String getDriverClass();
 }

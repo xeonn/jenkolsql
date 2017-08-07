@@ -372,6 +372,11 @@ public class BrowserController extends FxmlStage {
 
         treeView.setRoot(null);
 
+        try {
+            Class.forName(connectionModel.getDatabaseSystemEnum().getDriverClass());
+        } catch (ClassNotFoundException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
         try (Connection cnn = DriverManager.getConnection(
                 connectionModel.getUrl(null),
                 connectionModel.getUsername(),
