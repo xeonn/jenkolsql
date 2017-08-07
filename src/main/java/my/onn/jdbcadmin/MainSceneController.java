@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
@@ -48,6 +49,8 @@ public class MainSceneController {
     private Button buttonAdd;
     @FXML
     private TilePane tilePane;
+    @FXML
+    private Label startLabel;
 
     public void initialize() {
         connectionModels = connectionConfig.getConnectionModelsProperty();
@@ -69,8 +72,22 @@ public class MainSceneController {
                         tilePane.getChildren().remove(toRemove);
                     }
                 }
+
+                boolean labelExist = tilePane.getChildren().stream()
+                        .filter(n -> n == startLabel).findFirst().isPresent();
+
+                if (!connectionModels.isEmpty() && labelExist) {
+                    tilePane.getChildren().remove(startLabel);
+                } else if (connectionModels.isEmpty() && !labelExist) {
+                    tilePane.getChildren().add(startLabel);
+                }
             }
-        });
+        }
+        );
+
+        if (!connectionModels.isEmpty()) {
+            tilePane.getChildren().remove(startLabel);
+        }
     }
 
     /**
