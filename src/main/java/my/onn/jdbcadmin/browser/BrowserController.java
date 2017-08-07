@@ -297,7 +297,7 @@ public class BrowserController extends FxmlStage {
                                 db.getChildren().add(si);
                             }
 
-                            haveNext = schemas.isAfterLast();
+                            if (!haveNext) break;
                         } //Schema
                     }
                     if (!db.getChildren().isEmpty()) {
