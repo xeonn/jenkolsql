@@ -153,6 +153,7 @@ public class ConnectionDialog extends FxmlStage {
             textFieldPassword.setText(connectionModel.get().getPassword());
             textFieldPort.setText(Integer.toString(connectionModel.get().getPort()));
             textFieldUsername.setText(connectionModel.get().getUsername());
+            checkBoxEmptyPassword.setSelected(connectionModel.get().isEmptyPassword());
         }
     }
 
@@ -181,6 +182,7 @@ public class ConnectionDialog extends FxmlStage {
                     ? textFieldPort.getPromptText() : textFieldPort.getText());
             String username = textFieldUsername.getText().isEmpty()
                     ? textFieldUsername.getPromptText() : textFieldUsername.getText();
+            boolean isEmptyPassword = checkBoxEmptyPassword.selectedProperty().get();
 
             ConnectionModel cm = new ConnectionBuilder()
                     .setDatabaseSystemEnum(dbe)
@@ -190,6 +192,7 @@ public class ConnectionDialog extends FxmlStage {
                     .setPassword(password)
                     .setPort(port)
                     .setUsername(username)
+                    .setEmptyPassword(isEmptyPassword)
                     .build();
 
             try {
@@ -239,6 +242,7 @@ public class ConnectionDialog extends FxmlStage {
                         ? textFieldPort.getPromptText() : textFieldPort.getText()))
                 .setUsername(textFieldUsername.getText().isEmpty()
                         ? textFieldUsername.getPromptText() : textFieldUsername.getText())
+                .setEmptyPassword(checkBoxEmptyPassword.selectedProperty().get())
                 .build();
         connectionModel.set(newModel);
 

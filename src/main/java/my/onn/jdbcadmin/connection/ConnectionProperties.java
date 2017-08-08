@@ -112,7 +112,7 @@ public class ConnectionProperties {
                     .setPassword(config.get(groupKey + ".password").toString())
                     .setPort(Integer.parseInt(config.get(groupKey + ".port").toString()))
                     .setUsername(config.get(groupKey + ".username").toString())
-                    .setEmptyPassword(Boolean.parseBoolean(config.get(groupKey + ".empty_password").toString()))
+                    .setEmptyPassword(Boolean.parseBoolean(config.getProperty(groupKey + ".empty_password", "false").toString()))
                     .build();
 
             connectionModels.add(cm);

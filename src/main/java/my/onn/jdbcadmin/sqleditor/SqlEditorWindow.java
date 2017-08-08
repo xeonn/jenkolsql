@@ -23,10 +23,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import static java.sql.Types.*;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -38,16 +42,20 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 /**
  * FXML Controller class
@@ -70,11 +78,42 @@ public class SqlEditorWindow extends FxmlStage {
     private double connectiontime;
     private double querytime;
 
+    private static final String[] KEYWORDS = new String[]{
+        "accessible", "account", "add", "after", "aggregate", "algorithm",
+        "all", "alter", "always", "analyze", "and", "any", "as", "asc",
+        "authorization", "backup",
+        "begin", "between", "break", "browse", "bulk", "by", "cascade", "case",
+        "check", "checkpoint", "close", "clustered", "coalesce", "collate",
+        "column", "commit", "compute", "constraint", "contains", "containstable",
+        "continue", "convert", "create", "cross", "current", "current_date",
+        "decimal", "desc", "disable", "disk", "do", "dual",
+        "else", "elseif", "enable", "ends", "execute", "false", "fetch", "found",
+        "from", "is", "join", "key",
+        "left", "null", "numeric", "now",
+        "on", "order", "right",
+        "primary", "returns", "row", "rows",
+        "select",
+        "table", "text", "to", "trigger", "union", "when", "where", "xor"
+
+    };
+    private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
+    private static final String PAREN_PATTERN = "\\(|\\)";
+    private static final String SEMICOLON_PATTERN = "\\;";
+    private static final String STRING_PATTERN = "\'([^\'\\\\]|\\\\.)*\'";
+    private static final String COMMENT_PATTERN = "--[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
+
+    private static final Pattern PATTERN = Pattern.compile(
+            "(?<KEYWORD>" + KEYWORD_PATTERN + ")"
+            + "|(?<PAREN>" + PAREN_PATTERN + ")"
+            + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
+            + "|(?<STRING>" + STRING_PATTERN + ")"
+            + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
+             Pattern.CASE_INSENSITIVE);
+
     @Inject
     MainResource resources;
 
-    @FXML
-    private TextArea textAreaSql;
+    private CodeArea textAreaSql;
     @FXML
     private TableView<ArrayList<String>> tableView;
     @FXML
@@ -83,21 +122,29 @@ public class SqlEditorWindow extends FxmlStage {
     private TabPane tabPane;
     @FXML
     private Label labelMessage;
+    @FXML
+    private AnchorPane anchorPaneTextEditor;
+
+    public SqlEditorWindow() {
+        textAreaSql = new CodeArea();
+    }
 
     /**
      * Initializes the controller class.
      */
     public void initialize() {
-        String fName = "/fonts/UbuntuMono-R.ttf";
-        InputStream is = SqlEditorWindow.class.getResourceAsStream(fName);
-        Font ubuntuFont = Font.loadFont(is, Font.getDefault().getSize() + 3);
-        textAreaSql.setFont(ubuntuFont);
-        try {
-            is.close();
-        } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
-        }
 
+        anchorPaneTextEditor.getChildren().add(new VirtualizedScrollPane<>(textAreaSql));
+        textAreaSql.prefWidthProperty().bind(anchorPaneTextEditor.widthProperty());
+        textAreaSql.prefHeightProperty().bind(anchorPaneTextEditor.heightProperty());
+        textAreaSql.setOnKeyReleased(ev -> onTextAreaSqlKeyReleased(ev));
+
+        textAreaSql.setParagraphGraphicFactory(LineNumberFactory.get(textAreaSql));
+        textAreaSql.richChanges()
+                .filter(ch -> !ch.getInserted().equals(ch.getRemoved())) // XXX
+                .subscribe(change -> {
+                    textAreaSql.setStyleSpans(0, computeHighlighting(textAreaSql.getText()));
+                });
     }
 
     private void executeSql(String sql) {
@@ -191,7 +238,7 @@ public class SqlEditorWindow extends FxmlStage {
         Execute selected text or fallback to all.
          */
 
-        String strSql = textAreaSql.selectedTextProperty().get();
+        String strSql = textAreaSql.selectedTextProperty().getValue();
 
         if (strSql.isEmpty()) {
             strSql = textAreaSql.getText();
@@ -281,7 +328,7 @@ public class SqlEditorWindow extends FxmlStage {
                 while ((ch = isr.read()) > 0) {
                     sb.append((char) ch);
                 }
-                textAreaSql.setText(sb.toString());
+                textAreaSql.replaceText(sb.toString());
                 openedFile = file.getAbsolutePath();
                 setTitle(stageTitle + " - [" + file.getName() + "]");
             } catch (FileNotFoundException ex) {
@@ -305,10 +352,31 @@ public class SqlEditorWindow extends FxmlStage {
         this.password = password;
     }
 
-    @FXML
     private void onTextAreaSqlKeyReleased(KeyEvent event) {
         if (event.getCode() == KeyCode.F5) {
             onButtonRun(null);
         }
+    }
+
+    private static StyleSpans<Collection<String>> computeHighlighting(String text) {
+        Matcher matcher = PATTERN.matcher(text);
+        int lastKwEnd = 0;
+        StyleSpansBuilder<Collection<String>> spansBuilder
+                = new StyleSpansBuilder<>();
+        while (matcher.find()) {
+            String styleClass
+                    = matcher.group("KEYWORD") != null ? "keyword"
+                    : matcher.group("PAREN") != null ? "paren"
+                    : matcher.group("SEMICOLON") != null ? "semicolon"
+                    : matcher.group("STRING") != null ? "string"
+                    : matcher.group("COMMENT") != null ? "comment"
+                    : null;
+            /* never happens */ assert styleClass != null;
+            spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
+            spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
+            lastKwEnd = matcher.end();
+        }
+        spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
+        return spansBuilder.create();
     }
 }
