@@ -74,14 +74,16 @@ public final class ConnectionModel {
      * @return
      */
     public String getUrl(String database) {
+        if (getDatabaseSystemEnum() == ORACLE) {
+            // jdbc:oracle:thin:@<hostname>:<port>:<sid>
+            return String.format("%s:@%s:%d:%s",
+                    getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
+                    getMaintenanceDb());
+        }
+
         if (database == null) {
             if (getDatabaseSystemEnum() == MYSQL) {
                 return String.format("%s://%s:%d/%s",
-                        getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
-                        getMaintenanceDb());
-            } else if (getDatabaseSystemEnum() == ORACLE) {
-                // jdbc:oracle:thin:@<hostname>:<port>:<sid>
-                return String.format("%s:@%s:%d:%s",
                         getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
                         getMaintenanceDb());
             }
@@ -94,6 +96,12 @@ public final class ConnectionModel {
     }
 
     public String getMaintenanceUrl() {
+        if (getDatabaseSystemEnum() == ORACLE) {
+            // jdbc:oracle:thin:@<hostname>:<port>:<sid>
+            return String.format("%s:@%s:%d:%s",
+                    getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
+                    getMaintenanceDb());
+        }
         return String.format("%s://%s:%d/?",
                 getDatabaseSystemEnum().getProtocol(), getHost(), getPort());
     }
