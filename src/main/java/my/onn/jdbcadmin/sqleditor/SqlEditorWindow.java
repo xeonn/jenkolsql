@@ -78,7 +78,22 @@ public class SqlEditorWindow extends FxmlStage {
     private double querytime;
 
     private static final String[] KEYWORDS = new String[]{
-        "select", "from", "join", "on"
+        "accessible", "account", "add", "after", "aggregate", "algorithm",
+        "all", "alter", "always", "analyze", "and", "any", "as", "asc",
+        "authorization", "backup",
+        "begin", "between", "break", "browse", "bulk", "by", "cascade", "case",
+        "check", "checkpoint", "close", "clustered", "coalesce", "collate",
+        "column", "commit", "compute", "constraint", "contains", "containstable",
+        "continue", "convert", "create", "cross", "current", "current_date",
+        "decimal", "desc", "disable", "disk", "do", "dual",
+        "else", "elseif", "enable", "ends", "execute", "false", "fetch", "found",
+        "from", "is", "join", "key",
+        "left", "null", "numeric", "now",
+        "on", "order", "right",
+        "primary", "returns", "row", "rows",
+        "select",
+        "table", "text", "to", "trigger", "union", "when", "where", "xor"
+
     };
     private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
     private static final String PAREN_PATTERN = "\\(|\\)";
@@ -91,8 +106,8 @@ public class SqlEditorWindow extends FxmlStage {
             + "|(?<PAREN>" + PAREN_PATTERN + ")"
             + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
             + "|(?<STRING>" + STRING_PATTERN + ")"
-            + "|(?<COMMENT>" + COMMENT_PATTERN + ")"
-    );
+            + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
+             Pattern.CASE_INSENSITIVE);
 
     @Inject
     MainResource resources;
