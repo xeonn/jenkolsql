@@ -45,7 +45,7 @@ public class ConnectionProperties {
     private final SortedProperties config;
 
     private final ObservableSet<ConnectionModel> connectionModels = FXCollections.observableSet(new HashSet());
-    private final String fileLocation = String.format("%s/%s.%s", System.getProperty("user.dir"), FILENAME, EXT);
+    private final String fileLocation = String.format("%s/%s.%s", System.getProperty("user.home"), FILENAME, EXT);
 
     public ConnectionProperties() {
         this.config = new SortedProperties();
