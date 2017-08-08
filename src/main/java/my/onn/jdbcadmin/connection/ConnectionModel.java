@@ -8,8 +8,11 @@ package my.onn.jdbcadmin.connection;
 import static my.onn.jdbcadmin.connection.DatabaseSystemEnum.*;
 
 /**
- * Immutable class to represent database connection information
+ * Immutable class to represent database connection information.
  *
+ * ConnectionModel can and should only be created by {
+ *
+ * @see my.onn.jdbcadmin.connection.ConnectionBuilder}
  * @author onn
  */
 public final class ConnectionModel {
