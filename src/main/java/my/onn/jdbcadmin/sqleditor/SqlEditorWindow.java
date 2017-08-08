@@ -371,7 +371,6 @@ public class SqlEditorWindow extends FxmlStage {
                     : matcher.group("COMMENT") != null ? "comment"
                     : null;
             /* never happens */ assert styleClass != null;
-            logger.info("computeHighlighting " + matcher.group("KEYWORD"));
             spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
             spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
             lastKwEnd = matcher.end();
