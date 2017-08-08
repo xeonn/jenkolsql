@@ -1,0 +1,11 @@
+/* 
+ Syntax highlighting for sql editor.
+
+    Created on : Aug 8, 2017, 8:01:14 AM
+    Author     : onn
+*/
+
+.keyword {
+    -fx-fill: purple;
+    -fx-font-weight: bold;
+}

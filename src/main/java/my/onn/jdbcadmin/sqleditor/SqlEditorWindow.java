@@ -23,10 +23,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import static java.sql.Types.*;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -48,6 +52,9 @@ import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
 import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 /**
  * FXML Controller class
@@ -69,6 +76,15 @@ public class SqlEditorWindow extends FxmlStage {
     List<String> tableViewColumn = new ArrayList<>();
     private double connectiontime;
     private double querytime;
+
+    private static final String[] KEYWORDS = new String[]{
+        "select", "from", "join", "on"
+    };
+    private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
+
+    private static final Pattern PATTERN = Pattern.compile(
+            "(?<KEYWORD>" + KEYWORD_PATTERN + ")"
+    );
 
     @Inject
     MainResource resources;
@@ -93,10 +109,18 @@ public class SqlEditorWindow extends FxmlStage {
      * Initializes the controller class.
      */
     public void initialize() {
+
         anchorPaneTextEditor.getChildren().add(textAreaSql);
         textAreaSql.prefWidthProperty().bind(anchorPaneTextEditor.widthProperty());
         textAreaSql.prefHeightProperty().bind(anchorPaneTextEditor.heightProperty());
         textAreaSql.setOnKeyReleased(ev -> onTextAreaSqlKeyReleased(ev));
+
+        textAreaSql.setParagraphGraphicFactory(LineNumberFactory.get(textAreaSql));
+        textAreaSql.richChanges()
+                .filter(ch -> !ch.getInserted().equals(ch.getRemoved())) // XXX
+                .subscribe(change -> {
+                    textAreaSql.setStyleSpans(0, computeHighlighting(textAreaSql.getText()));
+                });
     }
 
     private void executeSql(String sql) {
@@ -308,5 +332,24 @@ public class SqlEditorWindow extends FxmlStage {
         if (event.getCode() == KeyCode.F5) {
             onButtonRun(null);
         }
+    }
+
+    private static StyleSpans<Collection<String>> computeHighlighting(String text) {
+        Matcher matcher = PATTERN.matcher(text);
+        int lastKwEnd = 0;
+        StyleSpansBuilder<Collection<String>> spansBuilder
+                = new StyleSpansBuilder<>();
+        while (matcher.find()) {
+            String styleClass
+                    = matcher.group("KEYWORD") != null ? "keyword"
+                    : null;
+            /* never happens */ assert styleClass != null;
+            logger.info("computeHighlighting " + matcher.group("KEYWORD"));
+            spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
+            spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
+            lastKwEnd = matcher.end();
+        }
+        spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
+        return spansBuilder.create();
     }
 }

@@ -44,7 +44,7 @@ public final class FxmlControllerProducer {
             dialog.setTitle(resources.getString(fxmlUi.getTitle()));
 
             Scene scene = new Scene((Parent) loader.load());
-            scene.getStylesheets().add("/styles/Styles.css");
+            scene.getStylesheets().addAll("/styles/Styles.css", "/styles/sql-keyword.css");
             dialog.setScene(scene);
             return dialog;
         } catch (IOException ex) {
