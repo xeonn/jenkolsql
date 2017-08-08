@@ -79,6 +79,11 @@ public final class ConnectionModel {
                 return String.format("%s://%s:%d/%s",
                         getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
                         getMaintenanceDb());
+            } else if (getDatabaseSystemEnum() == ORACLE) {
+                // jdbc:oracle:thin:@<hostname>:<port>:<sid>
+                return String.format("%s:@%s:%d:%s",
+                        getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
+                        getMaintenanceDb());
             }
             return getMaintenanceUrl();
         } else {

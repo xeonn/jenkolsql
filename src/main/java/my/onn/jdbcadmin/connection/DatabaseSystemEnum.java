@@ -58,7 +58,7 @@ public enum DatabaseSystemEnum {
 
     },
     ORACLE {
-        private final String PROTOCOL = "jdbc:oracle";
+        private final String PROTOCOL = "jdbc:oracle:thin";
 
         @Override
         public String getMaintenanceDbPrompt() {
@@ -97,7 +97,7 @@ public enum DatabaseSystemEnum {
 
         @Override
         public String getCatalogSql() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return "SELECT username FROM all_users ORDER BY username";
         }
     },
     POSTGRES {

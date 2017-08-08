@@ -195,11 +195,6 @@ public class ConnectionDialog extends FxmlStage {
                     .setEmptyPassword(isEmptyPassword)
                     .build();
 
-            try {
-                Class.forName(cm.getDatabaseSystemEnum().getDriverClass());
-            } catch (ClassNotFoundException ex) {
-                logger.log(Level.SEVERE, null, ex);
-            }
             try (Connection cnn = DriverManager.getConnection(cm.getUrl(null), cm.getUsername(), cm.getPassword())) {
                 if (cnn.isValid(2)) {
                     Platform.runLater(() -> {
