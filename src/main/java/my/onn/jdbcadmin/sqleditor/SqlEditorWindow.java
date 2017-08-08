@@ -51,6 +51,7 @@ import javafx.stage.FileChooser;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
+import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
@@ -133,7 +134,7 @@ public class SqlEditorWindow extends FxmlStage {
      */
     public void initialize() {
 
-        anchorPaneTextEditor.getChildren().add(textAreaSql);
+        anchorPaneTextEditor.getChildren().add(new VirtualizedScrollPane<>(textAreaSql));
         textAreaSql.prefWidthProperty().bind(anchorPaneTextEditor.widthProperty());
         textAreaSql.prefHeightProperty().bind(anchorPaneTextEditor.heightProperty());
         textAreaSql.setOnKeyReleased(ev -> onTextAreaSqlKeyReleased(ev));
