@@ -78,7 +78,7 @@ public final class ConnectionModel {
             // jdbc:oracle:thin:@<hostname>:<port>:<sid>
             return String.format("%s:@%s:%d:%s",
                     getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
-                    getMaintenanceDb());
+                    getUsername().toUpperCase());
         }
 
         if (database == null) {
@@ -100,7 +100,7 @@ public final class ConnectionModel {
             // jdbc:oracle:thin:@<hostname>:<port>:<sid>
             return String.format("%s:@%s:%d:%s",
                     getDatabaseSystemEnum().getProtocol(), getHost(), getPort(),
-                    getMaintenanceDb());
+                    getUsername().toUpperCase());
         }
         return String.format("%s://%s:%d/?",
                 getDatabaseSystemEnum().getProtocol(), getHost(), getPort());

@@ -97,7 +97,7 @@ public enum DatabaseSystemEnum {
 
         @Override
         public String getCatalogSql() {
-            return "SELECT username FROM all_users ORDER BY username";
+            return "SELECT username FROM all_users";
         }
     },
     POSTGRES {
