@@ -22,11 +22,6 @@ public enum DatabaseSystemEnum {
         }
 
         @Override
-        public String getHostPrompt() {
-            return "localhost";
-        }
-
-        @Override
         public int getPortPrompt() {
             return 3306;
         }
@@ -63,11 +58,6 @@ public enum DatabaseSystemEnum {
         @Override
         public String getMaintenanceDbPrompt() {
             return "sys";
-        }
-
-        @Override
-        public String getHostPrompt() {
-            return "localhost";
         }
 
         @Override
@@ -109,11 +99,6 @@ public enum DatabaseSystemEnum {
         }
 
         @Override
-        public String getHostPrompt() {
-            return "localhost";
-        }
-
-        @Override
         public int getPortPrompt() {
             return 5432;
         }
@@ -146,7 +131,9 @@ public enum DatabaseSystemEnum {
 
     public abstract String getMaintenanceDbPrompt();
 
-    public abstract String getHostPrompt();
+    public String getHostPrompt() {
+        return "localhost";
+    }
 
     public abstract int getPortPrompt();
 
