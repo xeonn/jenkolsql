@@ -195,7 +195,7 @@ public class ConnectionDialog extends FxmlStage {
                     .setEmptyPassword(isEmptyPassword)
                     .build();
 
-            try (Connection cnn = DriverManager.getConnection(cm.getUrl(null), cm.getUsername(), cm.getPassword())) {
+            try (Connection cnn = DriverManager.getConnection(cm.getUrl(maintenanceDb), cm.getUsername(), cm.getPassword())) {
                 if (cnn.isValid(2)) {
                     Platform.runLater(() -> {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);

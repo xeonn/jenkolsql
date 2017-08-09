@@ -11,6 +11,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,7 +53,7 @@ public class BrowserController extends FxmlStage {
      * Mostly modification of item will be done at the model object. The
      * treeViewResult component are refreshed with this model only.
      */
-    BrowserItem model = new BrowserItem("empty", "No item selected", IconsEnum.UNKNOWN);
+    BrowserItem model = new BrowserItem("", "empty", "No item selected", IconsEnum.UNKNOWN);
 
     ConnectionModel connectionModel;
 
@@ -179,11 +180,24 @@ public class BrowserController extends FxmlStage {
         return vbox;
     }
 
+    /**
+     * Retrieve and populate treeview using a worker thread.
+     *
+     * The structure of database display to user will be using a standard format
+     * CATALOG - SCHEMA - TABLES/VIEW/PROCEDURE - COLUMNS
+     *
+     * @return
+     */
     private CompletableFuture fetchModel() {
         return CompletableFuture.runAsync(() -> {
-            try (Connection cnn = DriverManager.getConnection(connectionModel.getMaintenanceUrl(), connectionModel.getUsername(), connectionModel.getPassword())) {
+            logger.info("Worker thread begin Connection to " + connectionModel.getMaintenanceUrl());
+            try (Connection cnn = DriverManager.getConnection(
+                    connectionModel.getMaintenanceUrl(),
+                    connectionModel.getUsername(),
+                    connectionModel.getPassword())) {
 
                 model = new BrowserItem(
+                        connectionModel.getUrl(null),
                         String.format("%s\n[%s:%d]",
                                 connectionModel.getName(),
                                 connectionModel.getHost(),
@@ -191,123 +205,119 @@ public class BrowserController extends FxmlStage {
                         "Server (root item)",
                         IconsEnum.SERVER);
 
+                DatabaseTree visitor = DatabaseTree.get(connectionModel);
+
                 // Database
                 PreparedStatement stmt = cnn.prepareStatement(
-                        connectionModel.getDatabaseSystemEnum().getCatalogSql(),
+                        visitor.getCatalogSql(),
                         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
-                ResultSet rsdatabase = stmt.executeQuery();
+                ResultSet catalogRS = stmt.executeQuery();
 
-                while (rsdatabase.next()) {
-                    String catalog = rsdatabase.getString(1);
+                List<BrowserItem> catalogs = visitor.getCatalogItems(catalogRS);
+                catalogs.stream().forEach(catalog -> {
 
-                    BrowserItem db = new BrowserItem(
-                            catalog,
-                            "Database",
-                            IconsEnum.DATABASE);
-
-                    try (Connection cnnDb = DriverManager.getConnection(connectionModel.getUrl(catalog),
+                    try (Connection cnnDb = DriverManager.getConnection(connectionModel.getUrl(catalog.getValue()),
                             connectionModel.getUsername(), connectionModel.getPassword())) {
 
-                        boolean haveNext = true;
-                        ResultSet schemas = cnnDb.getMetaData().getSchemas(catalog, null);
-                        while (haveNext) {
-                            haveNext = schemas.next();
-                            String schema;
+                        logger.info("Catalog " + catalog.getValue() + " retrieved via " + connectionModel.getUrl(catalog.getValue()));
+                        ResultSet schemaRS = cnnDb.getMetaData().getSchemas(catalog.getValue(), null);
+                        List<BrowserItem> schemas = visitor.getSchemaItems(schemaRS, catalog);
+                        schemas.stream().forEach(schema -> {
+                            try {
+                                BrowserItem si = schema;
 
-                            // if the db does not support schema, only populate for the said database
-                            if (!haveNext) {
-                                if (!catalog.equals(connectionModel.getMaintenanceDb())) {
-                                    break;
-                                } else {
-                                    schema = catalog;
+                                /* Add TABLE to schema */
+                                BrowserItem ti = new BrowserItem("Table Summary", "Tables", "Tables", IconsEnum.NOTIFICATION);
+
+                                String[] ttype = {"SYSTEM TABLE", "TABLE"};
+                                ResultSet tables = cnnDb.getMetaData().getTables(catalog.getValue(), schema.getValue(), "%", ttype);
+                                while (tables.next()) {
+
+                                    logger.info("Retrieving information for table : " + tables.getString(3));
+
+                                    String table = tables.getString(3);
+                                    BrowserItem tti = new BrowserItem(table, table,
+                                            String.format("%s\n%s",
+                                                    tables.getString(2),
+                                                    tables.getString(3)),
+                                            IconsEnum.TABLEGRID);
+
+                                    //Columns
+                                    ResultSet columns = cnnDb.getMetaData().getColumns(null, null, table, "%");
+                                    while (columns.next()) {
+
+                                        BrowserItem ci = new BrowserItem(columns.getString(6), String.format("%s [%s(%s)]",
+                                                columns.getString(4), columns.getString(6), columns.getString(7)),
+                                                String.format("%s\n%s(%s)\nNullable : %s",
+                                                        columns.getString(4), columns.getString(6), columns.getString(7),
+                                                        columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
+                                                IconsEnum.COLUMN);
+
+                                        tti.getChildren().add(ci); // Add column to tables
+                                    }
+
+                                    ti.getChildren().add(tti); // Add tables to table parent
                                 }
-                            } else {
-                                schema = schemas.getString(1);
-                            }
-                            BrowserItem si = new BrowserItem(schema, "Schema", IconsEnum.SCHEMA);
-
-                            /* Add TABLE to schema */
-                            BrowserItem ti = new BrowserItem("Tables", "Tables", IconsEnum.NOTIFICATION);
-
-                            String[] ttype = {"SYSTEM TABLE", "TABLE"};
-                            ResultSet tables = cnnDb.getMetaData().getTables(catalog, schema, "%", ttype);
-                            while (tables.next()) {
-
-                                String table = tables.getString(3);
-                                BrowserItem tti = new BrowserItem(table,
-                                        String.format("%s\n%s",
-                                                tables.getString(2),
-                                                tables.getString(3)),
-                                        IconsEnum.TABLEGRID);
-
-                                //Columns
-                                ResultSet columns = cnnDb.getMetaData().getColumns(null, null, table, "%");
-                                while (columns.next()) {
-
-                                    BrowserItem ci = new BrowserItem(String.format("%s [%s(%s)]",
-                                            columns.getString(4), columns.getString(6), columns.getString(7)),
-                                            String.format("%s\n%s(%s)\nNullable : %s",
-                                                    columns.getString(4), columns.getString(6), columns.getString(7),
-                                                    columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
-                                            IconsEnum.COLUMN);
-
-                                    tti.getChildren().add(ci); // Add column to tables
+                                if (!ti.getChildren().isEmpty()) // Add table parent to schema if any
+                                {
+                                    si.getChildren().add(ti);
                                 }
 
-                                ti.getChildren().add(tti); // Add tables to table parent
-                            }
-                            if (!ti.getChildren().isEmpty()) // Add table parent to schema if any
-                            {
-                                si.getChildren().add(ti);
-                            }
+                                /* Add VIEW to schema */
+                                BrowserItem vi = new BrowserItem("View Summary", "Views", "Views", IconsEnum.SCREEN);
+                                String[] vtype = {"VIEW"};
+                                ResultSet views = cnnDb.getMetaData().getTables(catalog.getValue(), schema.getValue(), "%", vtype);
+                                while (views.next()) {
+                                    String view = views.getString(3);
+                                    BrowserItem vvi = new BrowserItem(
+                                            view,
+                                            view,
+                                            String.format("%s\n%s",
+                                                    views.getString(2),
+                                                    views.getString(3)),
+                                            IconsEnum.OPENBOOK);
 
-                            /* Add VIEW to schema */
-                            BrowserItem vi = new BrowserItem("Views", "Views", IconsEnum.SCREEN);
-                            String[] vtype = {"VIEW"};
-                            ResultSet views = cnnDb.getMetaData().getTables(catalog, schema, "%", vtype);
-                            while (views.next()) {
-                                String view = views.getString(3);
-                                BrowserItem vvi = new BrowserItem(view,
-                                        String.format("%s\n%s",
-                                                views.getString(2),
-                                                views.getString(3)),
-                                        IconsEnum.OPENBOOK);
+                                    //Columns
+                                    ResultSet columns = cnnDb.getMetaData().getColumns(null, null, view, "%");
+                                    while (columns.next()) {
 
-                                //Columns
-                                ResultSet columns = cnnDb.getMetaData().getColumns(null, null, view, "%");
-                                while (columns.next()) {
-
-                                    BrowserItem ci = new BrowserItem(String.format("%s [%s(%s)]",
-                                            columns.getString(4), columns.getString(6), columns.getString(7)),
-                                            String.format("%s\n%s(%s)\nNullable : %s",
-                                                    columns.getString(4), columns.getString(6), columns.getString(7),
-                                                    columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
-                                            IconsEnum.COLUMN);
-                                    vvi.getChildren().add(ci); // Add column to tables
+                                        BrowserItem ci = new BrowserItem(
+                                                columns.getString(4),
+                                                String.format("%s [%s(%s)]",
+                                                        columns.getString(4), columns.getString(6), columns.getString(7)),
+                                                String.format("%s\n%s(%s)\nNullable : %s",
+                                                        columns.getString(4), columns.getString(6), columns.getString(7),
+                                                        columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
+                                                IconsEnum.COLUMN);
+                                        vvi.getChildren().add(ci); // Add column to tables
+                                    }
+                                    vi.getChildren().add(vvi);
                                 }
-                                vi.getChildren().add(vvi);
-                            }
-                            if (!vi.getChildren().isEmpty()) {
-                                si.getChildren().add(vi);
-                            }
+                                if (!vi.getChildren().isEmpty()) {
+                                    si.getChildren().add(vi);
+                                }
 
-                            if (!si.getChildren().isEmpty()) // Add schema to catalog (if any)
-                            {
-                                db.getChildren().add(si);
-                            }
+                                if (!si.getChildren().isEmpty()) // Add schema to catalog (if any)
+                                {
+                                    catalog.getChildren().add(si);
+                                }
 
-                            if (!haveNext) break;
-                        } //Schema
+                            } catch (SQLException ex) {
+                                Logger.getLogger(BrowserController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }); //Schema
+                        if (!catalog.getChildren().isEmpty()) {
+                            model.getChildren().add(catalog);
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(BrowserController.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    if (!db.getChildren().isEmpty()) {
-                        model.getChildren().add(db);
-                    }
-                }
-
+                });
             } catch (SQLException ex) {
-                logger.log(Level.SEVERE, null, ex);
+                Logger.getLogger(BrowserController.class.getName()).log(Level.SEVERE, null, ex);
             }
+
         }).exceptionally(e -> {
             logger.log(Level.SEVERE, e.getLocalizedMessage());
             return null;
@@ -378,7 +388,8 @@ public class BrowserController extends FxmlStage {
         String database;
         // find database of selected item url
         TreeItem selectedItem = treeView.getSelectionModel().getSelectedItem();
-        database = (String) getDatabaseTreeItem(selectedItem).getValue().toString();
+        BrowserItem bItem = (BrowserItem) getDatabaseTreeItem(selectedItem).getValue();
+        database = bItem.getValue();
 
         SqlEditorWindow wnd = (SqlEditorWindow) fxmlControllerProducer.getFxmlDialog(FxmlUI.SQLEDITOR);
         wnd.setConnectionUrl(connectionModel.getUrl(database), connectionModel.getUsername(), connectionModel.getPassword());
@@ -392,11 +403,6 @@ public class BrowserController extends FxmlStage {
 
         treeView.setRoot(null);
 
-        try {
-            Class.forName(connectionModel.getDatabaseSystemEnum().getDriverClass());
-        } catch (ClassNotFoundException ex) {
-            logger.log(Level.SEVERE, null, ex);
-        }
         try (Connection cnn = DriverManager.getConnection(
                 connectionModel.getUrl(null),
                 connectionModel.getUsername(),

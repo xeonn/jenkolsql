@@ -108,7 +108,7 @@ public class SqlEditorWindow extends FxmlStage {
             + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
             + "|(?<STRING>" + STRING_PATTERN + ")"
             + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
-             Pattern.CASE_INSENSITIVE);
+            Pattern.CASE_INSENSITIVE);
 
     @Inject
     MainResource resources;
@@ -133,6 +133,7 @@ public class SqlEditorWindow extends FxmlStage {
      * Initializes the controller class.
      */
     public void initialize() {
+        logger.info("Using connection url " + this.connectionUrl);
 
         anchorPaneTextEditor.getChildren().add(new VirtualizedScrollPane<>(textAreaSql));
         textAreaSql.prefWidthProperty().bind(anchorPaneTextEditor.widthProperty());
@@ -340,6 +341,7 @@ public class SqlEditorWindow extends FxmlStage {
     }
 
     public void setConnectionUrl(String url, String username, String password) {
+        logger.info("Connecting to " + url);
         if (url.isEmpty() || username.isEmpty()) {
             throw new IllegalArgumentException("Database connection not available");
         }
