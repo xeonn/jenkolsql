@@ -17,11 +17,13 @@ import my.onn.jdbcadmin.ui.util.IconsEnum;
 public class BrowserItem {
 
     private final String label;
+    private final String value;
     private final IconsEnum icon;
     private final ObservableList<BrowserItem> children;
     private final String description;
 
-    BrowserItem(String label, String description, IconsEnum icon) {
+    BrowserItem(String value, String label, String description, IconsEnum icon) {
+        this.value = value;
         this.label = label;
         this.icon = icon;
         this.description = description;
@@ -39,9 +41,17 @@ public class BrowserItem {
     public ObservableList<BrowserItem> getChildren() {
         return children;
     }
-    
+
     public String getDescription() {
         return description;
+    }
+
+    public String getValue() {
+        if (value == null) {
+            return label;
+        } else {
+            return value;
+        }
     }
 
     @Override
