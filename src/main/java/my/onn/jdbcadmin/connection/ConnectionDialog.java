@@ -129,7 +129,7 @@ public class ConnectionDialog extends FxmlStage {
                 textFieldPassword.setText("");
                 textFieldPassword.setDisable(true);
             } else {
-                textFieldName.setDisable(false);
+                textFieldPassword.setDisable(false);
             }
         });
 
