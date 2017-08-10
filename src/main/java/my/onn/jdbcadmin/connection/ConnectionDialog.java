@@ -38,6 +38,8 @@ import javafx.util.converter.IntegerStringConverter;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
+import org.controlsfx.validation.ValidationSupport;
+import org.controlsfx.validation.Validator;
 
 /**
  * FXML Controller class
@@ -79,9 +81,11 @@ public class ConnectionDialog extends FxmlStage {
     private ChoiceBox<DatabaseSystemEnum> choiceBoxDbSystem;
     @FXML
     private CheckBox checkBoxEmptyPassword;
+    private final ValidationSupport validationSupport;
 
     public ConnectionDialog() throws IOException {
         this.connectionModel = new SimpleObjectProperty<>();
+        validationSupport = new ValidationSupport();
     }
 
     public ObjectProperty<ConnectionModel> connectionModel() {
@@ -97,11 +101,7 @@ public class ConnectionDialog extends FxmlStage {
         updateFieldText();
     }
 
-    /**
-     * Initializes the controller class.
-     */
-    public void initialize() {
-
+    private void setupControlBinding() {
         // Enable Test and OK button once all information are available
         buttonOk.disableProperty().bind(
                 textFieldName.textProperty().isEmpty().or((textFieldPassword.textProperty().isEmpty().and(
@@ -111,6 +111,14 @@ public class ConnectionDialog extends FxmlStage {
                 textFieldName.textProperty().isEmpty().or((textFieldPassword.textProperty().isEmpty().and(
                         checkBoxEmptyPassword.selectedProperty().not())))
         );
+
+    }
+
+    private void setupControlListeners() {
+        /*
+        Toggle check box for empty password. Unchecking a checkbox will clear text
+        in password field.
+         */
         checkBoxEmptyPassword.selectedProperty().addListener((obj, oldV, newV) -> {
             if (newV) {
                 textFieldPassword.setText("");
@@ -120,7 +128,10 @@ public class ConnectionDialog extends FxmlStage {
             }
         });
 
-        choiceBoxDbSystem.getItems().setAll(DatabaseSystemEnum.values());
+        /*
+         Populate and repopulate text field prompt text depending on selected
+         database type
+         */
         choiceBoxDbSystem.getSelectionModel().selectedItemProperty().addListener(item -> {
             if (item != null) {
                 DatabaseSystemEnum db = choiceBoxDbSystem.getSelectionModel().getSelectedItem();
@@ -129,7 +140,7 @@ public class ConnectionDialog extends FxmlStage {
                 textFieldPort.setPromptText(Integer.toString(db.getPortPrompt()));
                 textFieldUsername.setPromptText(db.getUsernamePrompt());
 
-                // Number only field
+                // Set up Port text field to Number only field
                 UnaryOperator<Change> integerFilter = c -> {
                     String newText = c.getControlNewText();
                     if (newText.matches("([1-9][0-9]*)?")) {
@@ -137,9 +148,28 @@ public class ConnectionDialog extends FxmlStage {
                     }
                     return null;
                 };
-                textFieldPort.setTextFormatter(new TextFormatter<>(new IntegerStringConverter(), db.getPortPrompt(), integerFilter));
+                textFieldPort.setTextFormatter(new TextFormatter<>(
+                        new IntegerStringConverter(), db.getPortPrompt(), integerFilter));
             }
         });
+    }
+
+    private void setupControlValidation() {
+        validationSupport.registerValidator(textFieldName,
+                Validator.createEmptyValidator("Text is required"));
+    }
+
+    /**
+     * Initializes the controller class.
+     */
+    public void initialize() {
+
+        choiceBoxDbSystem.getItems().setAll(DatabaseSystemEnum.values());
+
+        setupControlBinding();
+        setupControlListeners();
+        setupControlValidation();
+
         choiceBoxDbSystem.getSelectionModel().selectFirst();
         updateFieldText();
     }
@@ -224,6 +254,10 @@ public class ConnectionDialog extends FxmlStage {
 
     @FXML
     private void onActionButtonOk(ActionEvent event) {
+
+        if (validationSupport.isInvalid()) {
+            return;
+        }
 
         ConnectionModel newModel = new ConnectionBuilder()
                 .setDatabaseSystemEnum(choiceBoxDbSystem.getSelectionModel().getSelectedItem())
