@@ -67,6 +67,13 @@
             <version>0.7-M5</version>
         </dependency>
 
+        <!--Custom controls-->
+        <dependency>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>controlsfx</artifactId>
+            <version>8.40.13</version>
+        </dependency>
+
     </dependencies>
 
     <build>
