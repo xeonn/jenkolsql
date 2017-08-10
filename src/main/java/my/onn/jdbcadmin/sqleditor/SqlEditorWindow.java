@@ -235,6 +235,8 @@ public class SqlEditorWindow extends FxmlStage {
 
     @FXML
     private void onButtonRun(ActionEvent event) {
+        labelMessage.setText("");
+        
         /*
         Execute selected text or fallback to all.
          */
