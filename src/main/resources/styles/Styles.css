@@ -118,3 +118,47 @@
     -fx-text-fill: -fx-text-button-colored;
     -fx-min-width : 120;
 }
+
+/*******************************************************************************
+ *                                                                             *
+ * Material Design - Cards 				                       				   *
+ *                                                                             *
+ ******************************************************************************/
+.card {
+	-fx-background-color: rgb(255.0, 255.0, 255.0);
+	-fx-background-radius: 4.0;
+	-fx-effect: dropshadow(gaussian, rgb(0.0, 0.0, 0.0, 0.15), 6.0, 0.7, 0.0,
+		1.5);
+	-fx-padding: 16 16 16 16;
+}
+
+.card-title {
+	-fx-font-size: 20.0px;
+	-fx-padding: 5 0 5 0;
+}
+
+.card-title .text {
+	-fx-fill: -fx-text-title-color;
+}
+
+.card-subtitle {
+	-fx-font-size: 16.0px;
+	-fx-padding: 5 0 5 0;
+}
+
+.card-subtitle .text {
+	-fx-fill: -fx-text-subtitle-color;
+}
+
+.control-label {
+	-fx-font-size: 12.0px;
+	-fx-padding: 16 0 0 0;
+}
+
+.control-label .text {
+	-fx-fill: -fx-text-control-title-color;
+}
+
+.card-button {
+	-fx-effect: null;
+}

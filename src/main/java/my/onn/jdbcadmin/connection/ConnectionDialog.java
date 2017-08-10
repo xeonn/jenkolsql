@@ -19,12 +19,14 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
@@ -34,10 +36,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.util.converter.IntegerStringConverter;
 import javax.inject.Inject;
 import my.onn.jdbcadmin.MainResource;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
+import org.controlsfx.control.PopOver;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
 
@@ -150,8 +155,40 @@ public class ConnectionDialog extends FxmlStage {
                 };
                 textFieldPort.setTextFormatter(new TextFormatter<>(
                         new IntegerStringConverter(), db.getPortPrompt(), integerFilter));
+                /*
+             Try loading the selected driver and inform users via Popup
+                 */
+                try {
+                    DriverManager.getDriver(db.getDriverClass()).jdbcCompliant();
+                } catch (SQLException ex) {
+                    logger.info("Testing the driver");
+                    Logger.getLogger(ConnectionDialog.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                if (db.getDriverClass().equals("oracle.jdbc.OracleDriver")) {
+                    TextFlow flow = new TextFlow();
+                    Text title = new Text("Requires Oracle Jdbc driver");
+                    flow.getChildren().add(title);
+                    HBox hbox1 = new HBox(flow);
+                    hbox1.setId("card-title");
+                    Label content = new Label(
+                            "Due to license restriction, Oracle drivers requires separate download from\n");
+                    Text link = new Text("http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html\n");
+                    Text footer = new Text(
+                            "Unzip the jar and placed them in the lib folder.");
+
+                    VBox vbox = new VBox(hbox1, content, link, footer);
+                    vbox.setSpacing(5);
+                    vbox.setPadding(new Insets(10));
+                    vbox.setId("card");
+                    PopOver po = new PopOver(vbox);
+                    po.setCornerRadius(4);
+                    po.show(choiceBoxDbSystem);
+                }
             }
+
         });
+
     }
 
     private void setupControlValidation() {
