@@ -16,6 +16,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -228,7 +230,7 @@ public class BrowserController extends FxmlStage {
                                 BrowserItem si = schema;
 
                                 /* Add TABLE to schema */
-                                BrowserItem ti = new BrowserItem("Table Summary", "Tables", "Tables", IconsEnum.NOTIFICATION);
+                                ObservableList<BrowserItem> tableList = FXCollections.observableArrayList();
 
                                 String[] ttype = {"SYSTEM TABLE", "TABLE"};
                                 ResultSet tables = cnnDb.getMetaData().getTables(catalog.getValue(), schema.getValue(), "%", ttype);
@@ -237,11 +239,8 @@ public class BrowserController extends FxmlStage {
                                     logger.info("Retrieving information for table : " + tables.getString(3));
 
                                     String table = tables.getString(3);
-                                    BrowserItem tti = new BrowserItem(table, table,
-                                            String.format("%s\n%s",
-                                                    tables.getString(2),
-                                                    tables.getString(3)),
-                                            IconsEnum.TABLEGRID);
+
+                                    ObservableList<BrowserItem> columnList = FXCollections.observableArrayList();
 
                                     //Columns
                                     ResultSet columns = cnnDb.getMetaData().getColumns(null, null, table, "%");
@@ -254,31 +253,35 @@ public class BrowserController extends FxmlStage {
                                                         columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
                                                 IconsEnum.COLUMN);
 
-                                        tti.getChildren().add(ci); // Add column to tables
+                                        columnList.add(ci); // Add column to tables
                                     }
+                                    BrowserItem tti = new BrowserItem(table,
+                                            String.format("%s (%d cols)", table, columnList.size()),
+                                            String.format("%s\nNo of Columns: %d",
+                                                    tables.getString(3),
+                                                    columnList.size()),
+                                            IconsEnum.TABLEGRID);
+                                    tti.getChildren().addAll(columnList);
 
-                                    ti.getChildren().add(tti); // Add tables to table parent
+                                    tableList.add(tti); // Add tables to table parent
                                 }
-                                if (!ti.getChildren().isEmpty()) // Add table parent to schema if any
+                                if (!tableList.isEmpty()) // Add table parent to schema if any
                                 {
+                                    BrowserItem ti = new BrowserItem("Tables", String.format("Table (%d)", tableList.size()),
+                                            "Tables", IconsEnum.NOTIFICATION);
+                                    ti.getChildren().addAll(tableList);
                                     si.getChildren().add(ti);
                                 }
 
                                 /* Add VIEW to schema */
-                                BrowserItem vi = new BrowserItem("View Summary", "Views", "Views", IconsEnum.SCREEN);
+                                ObservableList<BrowserItem> viewList = FXCollections.observableArrayList();
                                 String[] vtype = {"VIEW"};
                                 ResultSet views = cnnDb.getMetaData().getTables(catalog.getValue(), schema.getValue(), "%", vtype);
                                 while (views.next()) {
                                     String view = views.getString(3);
-                                    BrowserItem vvi = new BrowserItem(
-                                            view,
-                                            view,
-                                            String.format("%s\n%s",
-                                                    views.getString(2),
-                                                    views.getString(3)),
-                                            IconsEnum.OPENBOOK);
 
                                     //Columns
+                                    ObservableList<BrowserItem> columnList = FXCollections.observableArrayList();
                                     ResultSet columns = cnnDb.getMetaData().getColumns(null, null, view, "%");
                                     while (columns.next()) {
 
@@ -290,11 +293,21 @@ public class BrowserController extends FxmlStage {
                                                         columns.getString(4), columns.getString(6), columns.getString(7),
                                                         columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
                                                 IconsEnum.COLUMN);
-                                        vvi.getChildren().add(ci); // Add column to tables
+                                        columnList.add(ci); // Add column to tables
                                     }
-                                    vi.getChildren().add(vvi);
+                                    BrowserItem vvi = new BrowserItem(view,
+                                            String.format("%s (%d cols)", view, columnList.size()),
+                                            String.format("%s\nNo of Columns: %d",
+                                                    tables.getString(3),
+                                                    columnList.size()),
+                                            IconsEnum.OPENBOOK);
+                                    vvi.getChildren().addAll(columnList);
+                                    viewList.add(vvi);
                                 }
-                                if (!vi.getChildren().isEmpty()) {
+                                if (!viewList.isEmpty()) {
+                                    BrowserItem vi = new BrowserItem("View", String.format("Views (%d)", viewList.size()),
+                                            "Tables", IconsEnum.SCREEN);
+                                    vi.getChildren().addAll(viewList);
                                     si.getChildren().add(vi);
                                 }
 
