@@ -8,6 +8,7 @@ package my.onn.jdbcadmin.ui.util;
 import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.sqleditor.SqlEditorWindow;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
+import my.onn.jdbcadmin.settings.SettingsDialog;
 
 /**
  *
@@ -46,6 +47,23 @@ public enum FxmlUI {
         public Class getDialogClass() {
             return ConnectionDialog.class;
         }
+    },
+    SETTINGS {
+        @Override
+        public String getFxml() {
+            return "/fxml/Settings.fxml";
+        }
+
+        @Override
+        public String getTitle() {
+            return "settings.title";
+        }
+
+        @Override
+        public Class getDialogClass() {
+            return SettingsDialog.class;
+        }
+
     },
     SQLEDITOR {
         @Override

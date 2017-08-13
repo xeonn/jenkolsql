@@ -24,6 +24,7 @@ import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.connection.ConnectionProperties;
+import my.onn.jdbcadmin.settings.SettingsDialog;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlUI;
 
@@ -53,8 +54,13 @@ public class MainSceneController {
     private TilePane tilePane;
     @FXML
     private Label startLabel;
+    @FXML
+    private Button buttonSettings;
 
     public void initialize() {
+
+        buttonSettings.setGraphic(new ImageView("/icons/settings_16x16.png"));
+
         connectionModels = connectionConfig.getConnectionModelsProperty();
         connectionModels.stream().forEach(cm -> createNewButton(cm));
 
@@ -211,5 +217,11 @@ public class MainSceneController {
             tilePane.getChildren().forEach(c -> c.setDisable(false));
         }
 
+    }
+
+    @FXML
+    private void onActionButtonSettings(ActionEvent event) {
+        SettingsDialog dialog = (SettingsDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.SETTINGS);
+        dialog.showAndWait();
     }
 }
