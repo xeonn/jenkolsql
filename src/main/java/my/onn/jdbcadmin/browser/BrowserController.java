@@ -298,7 +298,7 @@ public class BrowserController extends FxmlStage {
                                     BrowserItem vvi = new BrowserItem(view,
                                             String.format("%s (%d cols)", view, columnList.size()),
                                             String.format("%s\nNo of Columns: %d",
-                                                    tables.getString(3),
+                                                    views.getString(3),
                                                     columnList.size()),
                                             IconsEnum.OPENBOOK);
                                     vvi.getChildren().addAll(columnList);
