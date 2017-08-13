@@ -24,7 +24,7 @@ import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.connection.ConnectionProperties;
-import my.onn.jdbcadmin.settings.SettingsDialog;
+import my.onn.jdbcadmin.settings.SettingsDriverDialog;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlUI;
 
@@ -221,7 +221,7 @@ public class MainSceneController {
 
     @FXML
     private void onActionButtonSettings(ActionEvent event) {
-        SettingsDialog dialog = (SettingsDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.SETTINGS);
+        SettingsDriverDialog dialog = (SettingsDriverDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.SETTINGSDRIVER);
         dialog.showAndWait();
     }
 }

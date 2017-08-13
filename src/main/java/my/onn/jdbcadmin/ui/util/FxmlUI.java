@@ -8,7 +8,7 @@ package my.onn.jdbcadmin.ui.util;
 import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.sqleditor.SqlEditorWindow;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
-import my.onn.jdbcadmin.settings.SettingsDialog;
+import my.onn.jdbcadmin.settings.SettingsDriverDialog;
 
 /**
  *
@@ -48,20 +48,20 @@ public enum FxmlUI {
             return ConnectionDialog.class;
         }
     },
-    SETTINGS {
+    SETTINGSDRIVER {
         @Override
         public String getFxml() {
-            return "/fxml/Settings.fxml";
+            return "/fxml/SettingsDriver.fxml";
         }
 
         @Override
         public String getTitle() {
-            return "settings.title";
+            return "settings.driver.title";
         }
 
         @Override
         public Class getDialogClass() {
-            return SettingsDialog.class;
+            return SettingsDriverDialog.class;
         }
 
     },

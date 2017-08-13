@@ -5,6 +5,9 @@
  */
 package my.onn.jdbcadmin.settings;
 
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
 
 /**
@@ -12,13 +15,20 @@ import my.onn.jdbcadmin.ui.util.FxmlStage;
  *
  * @author onn
  */
-public class SettingsDialog extends FxmlStage {
+public class SettingsDriverDialog extends FxmlStage {
+
+    @FXML
+    private Button buttonAddFolder;
 
     /**
      * Initializes the controller class.
      */
     public void initialize() {
         // TODO
+    }
+
+    @FXML
+    private void onActionButtonAddFolder(ActionEvent event) {
     }
 
 }
