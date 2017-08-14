@@ -1,4 +1,4 @@
-# jenkolsql
+# juviasql
 Clutter free graphical SQL client that will allow you to view the structure of a JDBC compliant database, browse the data in tables and issue SQL commands in rich text syntax highlighted environment.
 
 # Motivation
@@ -36,4 +36,7 @@ MaterialFx (www.agix.pt/single-post/2015/09/02/MaterialFX-Material-Design-CSS-fo
 
 # Acknowledgement
 * Thomas Mikula - RichtextFx
+
+* Icons
+<div>Icons made by <a href="https://www.flaticon.com/authors/gregor-cresnar" title="Gregor Cresnar">Gregor Cresnar</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 
