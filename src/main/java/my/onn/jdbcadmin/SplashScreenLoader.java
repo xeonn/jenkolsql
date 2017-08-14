@@ -40,7 +40,7 @@ public class SplashScreenLoader extends Preloader{
     private Scene createScene() {
         BorderPane root = new BorderPane();
 
-        ImageView img = new ImageView("/images/jenkol-sql.png");
+        ImageView img = new ImageView("/images/juvia-sql.png");
 
         progressBar = new ProgressBar();
         progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);

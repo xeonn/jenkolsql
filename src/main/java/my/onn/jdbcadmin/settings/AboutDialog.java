@@ -24,7 +24,7 @@ public class AboutDialog extends FxmlStage {
      * Initializes the controller class.
      */
     public void initialize() {
-        imageView.setImage(new Image("/images/jenkol-sql.png"));
+        imageView.setImage(new Image("/images/juvia-sql.png"));
     }
 
 }

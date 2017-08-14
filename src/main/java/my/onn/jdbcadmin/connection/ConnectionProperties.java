@@ -38,7 +38,7 @@ public class ConnectionProperties {
     @Inject
     MainResource resources;
 
-    private final String FILENAME = "jenkolsql";
+    private final String FILENAME = "juviasql";
     private final String EXT = "properties";
     private final String CONFIGROOT = "Connections";
 
@@ -145,7 +145,7 @@ public class ConnectionProperties {
         File file = new File(fileLocation);
         try (FileOutputStream fos = new FileOutputStream(file);
                 OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
-            config.store(writer, "JenkolSQL");
+            config.store(writer, "JuviaSQL");
             writer.flush();
         } catch (IOException ex) {
             Logger.getLogger(ConnectionProperties.class.getName()).log(Level.SEVERE, null, ex);

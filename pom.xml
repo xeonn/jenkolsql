@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>my.onn</groupId>
-    <artifactId>jenkolsql</artifactId>
+    <artifactId>juviasql</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>JenkolSQL</name>
+    <name>JuviaSQL</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
