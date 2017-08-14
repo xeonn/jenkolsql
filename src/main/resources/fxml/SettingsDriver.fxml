@@ -7,7 +7,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-
 <VBox prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.onn.jdbcadmin.settings.SettingsDriverDialog">
    <children>
       <HBox alignment="TOP_RIGHT">
@@ -22,7 +21,7 @@
       </ListView>
       <ButtonBar prefHeight="40.0" prefWidth="200.0">
         <buttons>
-            <Button defaultButton="true" mnemonicParsing="false" text="OK" />
+            <Button defaultButton="true" mnemonicParsing="false" onAction="#onActionButtonOK" text="OK" />
         </buttons>
       </ButtonBar>
    </children>
