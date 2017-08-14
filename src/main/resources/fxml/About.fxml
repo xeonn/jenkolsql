@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.VBox?>
 
 
-<VBox xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.onn.jdbcadmin.ui.AboutDialog">
+<VBox xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.onn.jdbcadmin.settings.AboutDialog">
    <children>
       <ImageView fx:id="imageView" fitHeight="340.0" fitWidth="600.0" pickOnBounds="true" preserveRatio="true" />
       <HBox alignment="BOTTOM_CENTER" VBox.vgrow="NEVER">

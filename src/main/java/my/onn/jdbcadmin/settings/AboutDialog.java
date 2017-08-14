@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package my.onn.jdbcadmin.ui;
+package my.onn.jdbcadmin.settings;
 
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;

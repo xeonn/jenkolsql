@@ -26,7 +26,7 @@ import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.connection.ConnectionProperties;
 import my.onn.jdbcadmin.settings.SettingsDriverDialog;
-import my.onn.jdbcadmin.ui.AboutDialog;
+import my.onn.jdbcadmin.settings.AboutDialog;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlUI;
 

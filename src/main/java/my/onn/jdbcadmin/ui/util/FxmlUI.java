@@ -9,7 +9,7 @@ import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.sqleditor.SqlEditorWindow;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.settings.SettingsDriverDialog;
-import my.onn.jdbcadmin.ui.AboutDialog;
+import my.onn.jdbcadmin.settings.AboutDialog;
 
 /**
  *
