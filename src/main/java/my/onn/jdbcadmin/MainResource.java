@@ -10,6 +10,8 @@ import java.util.ResourceBundle;
 import javax.inject.Singleton;
 
 /**
+ * A singleton class maintaining access to internal resources available within
+ * the package jar
  *
  * @author onn
  */

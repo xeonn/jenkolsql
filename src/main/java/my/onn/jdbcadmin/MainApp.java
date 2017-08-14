@@ -21,7 +21,6 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        new JdbcLoader();
         weld.initialize().select(MainSceneController.class).get().start(stage);
     }
 

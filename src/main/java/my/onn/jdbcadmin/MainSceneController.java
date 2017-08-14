@@ -48,6 +48,9 @@ public class MainSceneController {
     @Inject
     FxmlControllerProducer fxmlControllerProducer;
 
+    @Inject
+    JdbcLoader jdbcLoader;
+
     @FXML
     private TextField textFieldSearch;
     @FXML

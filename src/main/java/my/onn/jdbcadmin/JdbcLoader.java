@@ -18,6 +18,8 @@ import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import my.onn.jdbcadmin.connection.DatabaseSystemEnum;
 
 /**
@@ -26,13 +28,22 @@ import my.onn.jdbcadmin.connection.DatabaseSystemEnum;
  */
 public class JdbcLoader {
 
+    @Inject
+    ApplicationPreference preference;
+
     private static final Class[] parameters = new Class[]{URL.class};
 
-    static {
-        if (Files.exists(Paths.get("./lib"))) {
+    @PostConstruct
+    public void init() {
+        String pluginPath = preference.getPluginPath();
+        if (pluginPath.isEmpty()) {
+            return;
+        }
+
+        if (Files.exists(Paths.get(pluginPath))) {
             try {
-                // load jdbc driver from current lib folder
-                Files.newDirectoryStream(Paths.get("./lib"), p -> p.toString().endsWith(".jar"))
+                // load jdbc driver from specified plugin folder
+                Files.newDirectoryStream(Paths.get(pluginPath), p -> p.toString().endsWith(".jar"))
                         .forEach(s -> {
                             try {
                                 addURL(s.toUri().toURL());

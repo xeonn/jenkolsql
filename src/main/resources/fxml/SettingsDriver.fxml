@@ -3,22 +3,20 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
-<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.onn.jdbcadmin.settings.SettingsDriverDialog">
+<VBox prefHeight="86.0" prefWidth="484.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.onn.jdbcadmin.settings.SettingsDriverDialog">
    <children>
-      <HBox alignment="TOP_RIGHT">
+      <HBox alignment="TOP_RIGHT" spacing="5.0">
          <children>
+            <Label text="Plugin Location" HBox.hgrow="ALWAYS" />
+            <TextField fx:id="textFieldPluginPath" editable="false" HBox.hgrow="ALWAYS" />
             <Button fx:id="buttonAddFolder" mnemonicParsing="false" onAction="#onActionButtonAddFolder" text="Add Folder ..." />
          </children>
       </HBox>
-      <ListView prefHeight="200.0" prefWidth="200.0">
-         <VBox.margin>
-            <Insets bottom="10.0" top="10.0" />
-         </VBox.margin>
-      </ListView>
       <ButtonBar prefHeight="40.0" prefWidth="200.0">
         <buttons>
             <Button defaultButton="true" mnemonicParsing="false" onAction="#onActionButtonOK" text="OK" />
