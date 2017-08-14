@@ -9,6 +9,7 @@ import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -96,6 +97,7 @@ public class MainSceneController {
         if (!connectionModels.isEmpty()) {
             tilePane.getChildren().remove(startLabel);
         }
+
     }
 
     /**
@@ -221,7 +223,22 @@ public class MainSceneController {
 
     @FXML
     private void onActionButtonSettings(ActionEvent event) {
-        SettingsDriverDialog dialog = (SettingsDriverDialog) fxmlControllerProducer.getFxmlDialog(FxmlUI.SETTINGSDRIVER);
-        dialog.showAndWait();
+        /* Menu item to access settings dialog*/
+        MenuItem driverMnu = new MenuItem("Add Driver ...");
+        driverMnu.setOnAction(e -> {
+            SettingsDriverDialog dialog = (SettingsDriverDialog) fxmlControllerProducer
+                    .getFxmlDialog(FxmlUI.SETTINGSDRIVER);
+            dialog.showAndWait();
+        });
+
+        MenuItem aboutMnu = new MenuItem("About ...");
+
+        ContextMenu menu = new ContextMenu();
+        menu.getItems().addAll(driverMnu, aboutMnu);
+        // Using coordinate relative to screen because context menu position should not be bound
+        // to a node.
+        Bounds bounds = buttonSettings.localToScreen(buttonSettings.getBoundsInLocal());
+        menu.show(buttonSettings, bounds.getMaxX(), bounds.getMaxY());
+
     }
 }
