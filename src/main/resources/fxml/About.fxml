@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+
+<VBox xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.onn.jdbcadmin.settings.AboutDialog">
+   <children>
+      <ImageView fx:id="imageView" fitHeight="340.0" fitWidth="600.0" pickOnBounds="true" preserveRatio="true" />
+      <HBox alignment="BOTTOM_CENTER" VBox.vgrow="NEVER">
+         <children>
+            <Label text="Version Info" HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
+   </children>
+</VBox>

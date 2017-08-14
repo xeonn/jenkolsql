@@ -9,6 +9,7 @@ import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -24,6 +25,8 @@ import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.connection.ConnectionProperties;
+import my.onn.jdbcadmin.settings.SettingsDriverDialog;
+import my.onn.jdbcadmin.settings.AboutDialog;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlUI;
 
@@ -45,6 +48,9 @@ public class MainSceneController {
     @Inject
     FxmlControllerProducer fxmlControllerProducer;
 
+    @Inject
+    JdbcLoader jdbcLoader;
+
     @FXML
     private TextField textFieldSearch;
     @FXML
@@ -53,8 +59,13 @@ public class MainSceneController {
     private TilePane tilePane;
     @FXML
     private Label startLabel;
+    @FXML
+    private Button buttonSettings;
 
     public void initialize() {
+
+        buttonSettings.setGraphic(new ImageView("/icons/settings_16x16.png"));
+
         connectionModels = connectionConfig.getConnectionModelsProperty();
         connectionModels.stream().forEach(cm -> createNewButton(cm));
 
@@ -90,6 +101,7 @@ public class MainSceneController {
         if (!connectionModels.isEmpty()) {
             tilePane.getChildren().remove(startLabel);
         }
+
     }
 
     /**
@@ -210,6 +222,32 @@ public class MainSceneController {
         } else {
             tilePane.getChildren().forEach(c -> c.setDisable(false));
         }
+
+    }
+
+    @FXML
+    private void onActionButtonSettings(ActionEvent event) {
+        /* Menu item to access settings dialog*/
+        MenuItem driverMnu = new MenuItem("Add Driver ...");
+        driverMnu.setOnAction(e -> {
+            SettingsDriverDialog dialog = (SettingsDriverDialog) fxmlControllerProducer
+                    .getFxmlDialog(FxmlUI.SETTINGSDRIVER);
+            dialog.showAndWait();
+        });
+
+        MenuItem aboutMnu = new MenuItem("About ...");
+        aboutMnu.setOnAction(e -> {
+            AboutDialog dialog = (AboutDialog) fxmlControllerProducer
+                    .getFxmlDialog(FxmlUI.ABOUT);
+            dialog.showAndWait();
+        });
+
+        ContextMenu menu = new ContextMenu();
+        menu.getItems().addAll(driverMnu, aboutMnu);
+        // Using coordinate relative to screen because context menu position should not be bound
+        // to a node.
+        Bounds bounds = buttonSettings.localToScreen(buttonSettings.getBoundsInLocal());
+        menu.show(buttonSettings, bounds.getMaxX(), bounds.getMaxY());
 
     }
 }
