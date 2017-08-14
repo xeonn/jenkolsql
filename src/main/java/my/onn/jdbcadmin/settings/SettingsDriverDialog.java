@@ -9,7 +9,8 @@ import java.io.File;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.stage.FileChooser;
+import javafx.stage.DirectoryChooser;
+import my.onn.jdbcadmin.ApplicationPreference;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
 
 /**
@@ -21,6 +22,7 @@ public class SettingsDriverDialog extends FxmlStage {
 
     @FXML
     private Button buttonAddFolder;
+    private ApplicationPreference preference;
 
     /**
      * Initializes the controller class.
@@ -31,12 +33,12 @@ public class SettingsDriverDialog extends FxmlStage {
 
     @FXML
     private void onActionButtonAddFolder(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select Plugin Path");
-        //fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("SQL Files", "*.sql"));
-        File file = fileChooser.showOpenDialog(this);
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Select Plugin Path");
+        File file = directoryChooser.showDialog(this);
 
         if (file != null) {
+            this.preference.setPluginLocation(file.getAbsolutePath());
         }
     }
 
