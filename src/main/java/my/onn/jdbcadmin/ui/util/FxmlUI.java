@@ -9,12 +9,30 @@ import my.onn.jdbcadmin.browser.BrowserController;
 import my.onn.jdbcadmin.sqleditor.SqlEditorWindow;
 import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.settings.SettingsDriverDialog;
+import my.onn.jdbcadmin.ui.AboutDialog;
 
 /**
  *
  * @author onn
  */
 public enum FxmlUI {
+    ABOUT {
+        @Override
+        public String getFxml() {
+            return "/fxml/About.fxml";
+        }
+
+        @Override
+        public String getTitle() {
+            return "about.title";
+        }
+
+        @Override
+        public Class getDialogClass() {
+            return AboutDialog.class;
+        }
+
+    },
     BROWSER {
         @Override
         public String getFxml() {

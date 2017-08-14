@@ -26,6 +26,7 @@ import my.onn.jdbcadmin.connection.ConnectionDialog;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.connection.ConnectionProperties;
 import my.onn.jdbcadmin.settings.SettingsDriverDialog;
+import my.onn.jdbcadmin.ui.AboutDialog;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlUI;
 
@@ -232,6 +233,11 @@ public class MainSceneController {
         });
 
         MenuItem aboutMnu = new MenuItem("About ...");
+        aboutMnu.setOnAction(e -> {
+            AboutDialog dialog = (AboutDialog) fxmlControllerProducer
+                    .getFxmlDialog(FxmlUI.ABOUT);
+            dialog.showAndWait();
+        });
 
         ContextMenu menu = new ContextMenu();
         menu.getItems().addAll(driverMnu, aboutMnu);
