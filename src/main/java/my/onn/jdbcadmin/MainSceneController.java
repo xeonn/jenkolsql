@@ -29,6 +29,7 @@ import my.onn.jdbcadmin.settings.SettingsDriverDialog;
 import my.onn.jdbcadmin.settings.AboutDialog;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlUI;
+import my.onn.jdbcadmin.ui.util.IconsEnum;
 
 public class MainSceneController {
 
@@ -64,7 +65,7 @@ public class MainSceneController {
 
     public void initialize() {
 
-        buttonSettings.setGraphic(new ImageView("/icons/settings_16x16.png"));
+        buttonSettings.setGraphic(new ImageView(IconsEnum.SETTINGS.getImage()));
 
         connectionModels = connectionConfig.getConnectionModelsProperty();
         connectionModels.stream().forEach(cm -> createNewButton(cm));

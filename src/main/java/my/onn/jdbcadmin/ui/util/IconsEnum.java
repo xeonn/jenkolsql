@@ -101,6 +101,17 @@ public enum IconsEnum {
             return img;
         }
     },
+    SETTINGS {
+        private Image img;
+
+        @Override
+        public Image getImage() {
+            if (img == null) {
+                img = new Image("/icons/settings_16x16.png");
+            }
+            return img;
+        }
+    },
     TABLEGRID {
         private Image img;
 
