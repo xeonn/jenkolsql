@@ -246,12 +246,7 @@ public class BrowserController extends FxmlStage {
                                     ResultSet columns = cnnDb.getMetaData().getColumns(null, null, table, "%");
                                     while (columns.next()) {
 
-                                        BrowserItem ci = new BrowserItem(columns.getString(6), String.format("%s [%s(%s)]",
-                                                columns.getString(4), columns.getString(6), columns.getString(7)),
-                                                String.format("%s\n%s(%s)\nNullable : %s",
-                                                        columns.getString(4), columns.getString(6), columns.getString(7),
-                                                        columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
-                                                IconsEnum.COLUMN);
+                                        BrowserItem ci = addColumnItem(columns);
 
                                         columnList.add(ci); // Add column to tables
                                     }
@@ -285,14 +280,7 @@ public class BrowserController extends FxmlStage {
                                     ResultSet columns = cnnDb.getMetaData().getColumns(null, null, view, "%");
                                     while (columns.next()) {
 
-                                        BrowserItem ci = new BrowserItem(
-                                                columns.getString(4),
-                                                String.format("%s [%s(%s)]",
-                                                        columns.getString(4), columns.getString(6), columns.getString(7)),
-                                                String.format("%s\n%s(%s)\nNullable : %s",
-                                                        columns.getString(4), columns.getString(6), columns.getString(7),
-                                                        columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
-                                                IconsEnum.COLUMN);
+                                        BrowserItem ci = addColumnItem(columns);
                                         columnList.add(ci); // Add column to tables
                                     }
                                     BrowserItem vvi = new BrowserItem(view,
@@ -335,6 +323,16 @@ public class BrowserController extends FxmlStage {
             logger.log(Level.SEVERE, e.getLocalizedMessage());
             return null;
         });
+    }
+
+    private BrowserItem addColumnItem(ResultSet columns) throws SQLException, NumberFormatException {
+        BrowserItem ci = new BrowserItem(columns.getString(6), String.format("%s [%s(%s)]",
+                columns.getString(4), columns.getString(6), columns.getString(7)),
+                String.format("%s\n%s(%s)\nNullable : %s",
+                        columns.getString(4), columns.getString(6), columns.getString(7),
+                        columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
+                IconsEnum.COLUMN);
+        return ci;
     }
 
     private void refreshTree() {
