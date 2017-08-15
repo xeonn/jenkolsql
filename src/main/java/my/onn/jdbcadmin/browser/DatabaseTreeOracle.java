@@ -4,9 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import static my.onn.jdbcadmin.browser.BrowserItemType.*;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.connection.DatabaseSystemEnum;
-import my.onn.jdbcadmin.ui.util.IconsEnum;
 
 public class DatabaseTreeOracle extends DatabaseTree {
 
@@ -45,7 +45,7 @@ public class DatabaseTreeOracle extends DatabaseTree {
                 null,
                 connectionModel.getMaintenanceDb(),
                 "Database",
-                IconsEnum.DATABASE));
+                DATABASE));
         return result;
     }
 
@@ -53,7 +53,7 @@ public class DatabaseTreeOracle extends DatabaseTree {
     public List<BrowserItem> getSchemaItems(ResultSet schemas, BrowserItem catalog) {
         /*Ignore schema and return the catalog instead*/
         List<BrowserItem> result = new ArrayList<>();
-        result.add(new BrowserItem(connectionModel.getUsername(), catalog.getLabel(), "Schema", IconsEnum.SCHEMA));
+        result.add(new BrowserItem(connectionModel.getUsername(), catalog.getLabel(), "Schema", SCHEMA));
         return result;
     }
 

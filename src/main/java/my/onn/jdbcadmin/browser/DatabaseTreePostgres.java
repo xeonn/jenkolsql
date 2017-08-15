@@ -4,9 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import static my.onn.jdbcadmin.browser.BrowserItemType.*;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.connection.DatabaseSystemEnum;
-import my.onn.jdbcadmin.ui.util.IconsEnum;
 
 public class DatabaseTreePostgres extends DatabaseTree {
 
@@ -42,7 +42,7 @@ public class DatabaseTreePostgres extends DatabaseTree {
                     catalog_resultset.getString(1),
                     catalog_resultset.getString(1),
                     "Database",
-                    IconsEnum.DATABASE));
+                    DATABASE));
         }
         return result;
     }
@@ -55,7 +55,7 @@ public class DatabaseTreePostgres extends DatabaseTree {
                     schema_resultset.getString(1),
                     schema_resultset.getString(1),
                     "Schema",
-                    IconsEnum.SCHEMA));
+                    SCHEMA));
         }
         return result;
     }

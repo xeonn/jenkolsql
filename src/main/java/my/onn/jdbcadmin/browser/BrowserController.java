@@ -33,12 +33,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javax.inject.Inject;
+import static my.onn.jdbcadmin.browser.BrowserItemType.*;
 import my.onn.jdbcadmin.sqleditor.SqlEditorWindow;
 import my.onn.jdbcadmin.connection.ConnectionModel;
 import my.onn.jdbcadmin.ui.util.FxmlControllerProducer;
 import my.onn.jdbcadmin.ui.util.FxmlStage;
 import my.onn.jdbcadmin.ui.util.FxmlUI;
-import my.onn.jdbcadmin.ui.util.IconsEnum;
 
 /**
  * FXML Controller class
@@ -55,7 +55,7 @@ public class BrowserController extends FxmlStage {
      * Mostly modification of item will be done at the model object. The
      * treeViewResult component are refreshed with this model only.
      */
-    BrowserItem model = new BrowserItem("", "empty", "No item selected", IconsEnum.UNKNOWN);
+    BrowserItem model;// = new BrowserItem("", "empty", "No item selected", BrowserItemType.SERVER);
 
     ConnectionModel connectionModel;
 
@@ -205,7 +205,7 @@ public class BrowserController extends FxmlStage {
                                 connectionModel.getHost(),
                                 connectionModel.getPort()),
                         "Server (root item)",
-                        IconsEnum.SERVER);
+                        BrowserItemType.SERVER);
 
                 DatabaseTree visitor = DatabaseTree.get(connectionModel);
 
@@ -255,7 +255,7 @@ public class BrowserController extends FxmlStage {
                                             String.format("%s\nNo of Columns: %d",
                                                     tables.getString(3),
                                                     columnList.size()),
-                                            IconsEnum.TABLEGRID);
+                                            TABLE);
                                     tti.getChildren().addAll(columnList);
 
                                     tableList.add(tti); // Add tables to table parent
@@ -263,7 +263,7 @@ public class BrowserController extends FxmlStage {
                                 if (!tableList.isEmpty()) // Add table parent to schema if any
                                 {
                                     BrowserItem ti = new BrowserItem("Tables", String.format("Table (%d)", tableList.size()),
-                                            "Tables", IconsEnum.NOTIFICATION);
+                                            "Tables", ALL_TABLE);
                                     ti.getChildren().addAll(tableList);
                                     si.getChildren().add(ti);
                                 }
@@ -288,13 +288,13 @@ public class BrowserController extends FxmlStage {
                                             String.format("%s\nNo of Columns: %d",
                                                     views.getString(3),
                                                     columnList.size()),
-                                            IconsEnum.OPENBOOK);
+                                            VIEW);
                                     vvi.getChildren().addAll(columnList);
                                     viewList.add(vvi);
                                 }
                                 if (!viewList.isEmpty()) {
                                     BrowserItem vi = new BrowserItem("View", String.format("Views (%d)", viewList.size()),
-                                            "Tables", IconsEnum.SCREEN);
+                                            "Tables", ALL_VIEW);
                                     vi.getChildren().addAll(viewList);
                                     si.getChildren().add(vi);
                                 }
@@ -331,7 +331,7 @@ public class BrowserController extends FxmlStage {
                 String.format("%s\n%s(%s)\nNullable : %s",
                         columns.getString(4), columns.getString(6), columns.getString(7),
                         columns.getString(9) == null || Integer.parseInt(columns.getString(9)) > 0 ? "Yes" : "No"),
-                IconsEnum.COLUMN);
+                COLUMN);
         return ci;
     }
 
@@ -342,7 +342,7 @@ public class BrowserController extends FxmlStage {
         fetchModel().thenRun(() -> Platform.runLater(() -> {
             // Fill up TreeView children from model
             TreeItem rootItem = new TreeItem<>(model);
-            rootItem.setGraphic(new ImageView(model.getIcon().getImage()));
+            rootItem.setGraphic(new ImageView(model.getBrowserItemType().getIcon()));
             treeView.setRoot(rootItem);
             addTreeItemRecursive(model, rootItem);
             treeView.refresh();
@@ -356,7 +356,7 @@ public class BrowserController extends FxmlStage {
         for (BrowserItem sub : browserItem.getChildren()) {
             TreeItem<BrowserItem> subItem = new TreeItem<>(sub);
             subItem.setValue(sub);
-            subItem.setGraphic(new ImageView(sub.getIcon().getImage()));
+            subItem.setGraphic(new ImageView(sub.getBrowserItemType().getIcon()));
             treeItem.getChildren().add(subItem);
 
             addTreeItemRecursive(sub, subItem);

@@ -18,20 +18,20 @@ public class BrowserItem {
 
     private final String label;
     private final String value;
-    private final IconsEnum icon;
+    private final BrowserItemType type;
     private final ObservableList<BrowserItem> children;
     private final String description;
 
-    BrowserItem(String value, String label, String description, IconsEnum icon) {
+    BrowserItem(String value, String label, String description, BrowserItemType type) {
         this.value = value;
         this.label = label;
-        this.icon = icon;
+        this.type = type;
         this.description = description;
         this.children = FXCollections.observableArrayList();
     }
 
-    public IconsEnum getIcon() {
-        return icon;
+    public BrowserItemType getBrowserItemType() {
+        return type;
     }
 
     public String getLabel() {
